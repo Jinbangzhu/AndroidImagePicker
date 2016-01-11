@@ -96,7 +96,7 @@ public class PickupImageFragment extends Fragment implements View.OnClickListene
 
         recyclerView.setAdapter(adapter);
 
-        float itemHeight = getResources().getDimension(R.dimen.album_selector_item_height);
+        float itemHeight = getResources().getDimension(R.dimen.pi_album_selector_item_height);
         int autoHeight = (int) (itemHeight * albumItems.size());
 
         int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels - itemHeight * 2);

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
@@ -13,6 +14,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,9 +38,9 @@ public class PickupImageActivity extends AppCompatActivity {
     private List<AlbumItem> albumItems;
 
     private TextView tvCurrentAlbumName;
-    private ImageView viewDummy;
+    private ImageView viewDummy, ivAlbumNameBarBackground;
     private RelativeLayout rlBottomBar;
-    private TransitionDrawable mDrawable;
+    private TransitionDrawable mDrawableDummy, mDrawableAlbumNameBar;
 
 
     @Override
@@ -56,7 +58,9 @@ public class PickupImageActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         tvCurrentAlbumName = (TextView) findViewById(R.id.tv_current_album_name);
         viewDummy = (ImageView) findViewById(R.id.view_dummy);
-        mDrawable = (TransitionDrawable) viewDummy.getDrawable();
+        ivAlbumNameBarBackground = (ImageView) findViewById(R.id.iv_album_name_bar_background);
+        mDrawableDummy = (TransitionDrawable) viewDummy.getDrawable();
+        mDrawableAlbumNameBar = (TransitionDrawable) ivAlbumNameBarBackground.getDrawable();
 
         rlBottomBar = (RelativeLayout) findViewById(R.id.rl_bottom);
         // use this setting to improve performance if you know that changes
@@ -90,7 +94,7 @@ public class PickupImageActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
 
-        float itemHeight = getResources().getDimension(R.dimen.album_selector_item_height);
+        float itemHeight = getResources().getDimension(R.dimen.pi_album_selector_item_height);
 
         float maxHeight = getResources().getDisplayMetrics().heightPixels - 2 * itemHeight;
         int totalHeight = (int) (itemHeight * adapter.getItemCount());
@@ -101,13 +105,15 @@ public class PickupImageActivity extends AppCompatActivity {
         final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, fixableHeight, true);
         popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.showAtLocation(rlBottomBar, Gravity.LEFT | Gravity.BOTTOM, 0, rlBottomBar.getHeight());
-        mDrawable.startTransition(200);
+        popupWindow.showAtLocation(rlBottomBar, Gravity.BOTTOM, 0, rlBottomBar.getHeight() + getSoftButtonsBarSizePort());
+        mDrawableDummy.startTransition(200);
+        mDrawableAlbumNameBar.startTransition(200);
 
         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                mDrawable.reverseTransition(200);
+                mDrawableDummy.reverseTransition(200);
+                mDrawableAlbumNameBar.reverseTransition(200);
             }
         });
         albumChooserView.setOnClickListener(new View.OnClickListener() {
@@ -204,5 +210,21 @@ public class PickupImageActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    private int getSoftButtonsBarSizePort() {
+        // getRealMetrics is only available with API 17 and +
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            int usableHeight = metrics.heightPixels;
+            getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+            int realHeight = metrics.heightPixels;
+            if (realHeight > usableHeight)
+                return realHeight - usableHeight;
+            else
+                return 0;
+        }
+        return 0;
+    }
 
 }

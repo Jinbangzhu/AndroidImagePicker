@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/rl_bottom"
-            android:layout_marginBottom="48dp"
+            android:layout_marginBottom="@dimen/pi_album_name_bar_height"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <android.support.v7.widget.RecyclerView
@@ -59,10 +59,14 @@
         <RelativeLayout
             android:id="@+id/rl_bottom"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:background="#99000000"
-            android:paddingLeft="8dp">
+            android:layout_height="@dimen/pi_album_name_bar_height"
+            android:layout_gravity="bottom">
+
+            <ImageView
+                android:id="@+id/iv_album_name_bar_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/pickup_image_album_name_bar_background" />
 
             <TextView
                 android:id="@+id/tv_current_album_name"
@@ -71,6 +75,7 @@
                 android:layout_centerVertical="true"
                 android:gravity="center"
                 android:onClick="onClickCurrentAlbumName"
+                android:paddingLeft="8dp"
                 android:text="Album"
                 android:textColor="#FFF" />
 
