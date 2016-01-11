@@ -12,14 +12,28 @@
         android:layout_centerVertical="true"
         android:scaleType="centerCrop" />
 
-    <TextView
-        android:id="@+id/tv_album_name"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="4dp"
-        android:layout_toRightOf="@+id/iv_album_cover"
-        tools:text="album name" />
+        android:layout_toRightOf="@+id/iv_album_cover">
 
+        <TextView
+            android:id="@+id/tv_album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            tools:text="album name" />
 
+        <TextView
+            android:id="@+id/tv_album_image_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_album_name"
+            android:textSize="12sp"
+            tools:text="12" />
+
+    </RelativeLayout>
 </RelativeLayout>

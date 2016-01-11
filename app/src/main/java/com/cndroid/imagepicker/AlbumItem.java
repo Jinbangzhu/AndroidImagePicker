@@ -34,4 +34,18 @@ public class AlbumItem {
     }
 
     private Uri albumImageUrl;
+
+    public int getImageCount() {
+        return imageCount;
+    }
+
+    public void increaseImageCount() {
+        imageCount++;
+    }
+
+    public void setImageCount(int imageCount) {
+        this.imageCount = imageCount;
+    }
+
+    private int imageCount ;
 }

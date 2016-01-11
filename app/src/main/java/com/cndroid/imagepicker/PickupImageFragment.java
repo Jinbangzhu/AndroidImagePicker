@@ -7,15 +7,15 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jinbangzhu on 1/8/16.
+ * Created by jinbangzhu on 1/11/16.
  */
-public class PickupImageActivity extends AppCompatActivity {
+public class PickupImageFragment extends Fragment implements View.OnClickListener {
 
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -42,31 +42,38 @@ public class PickupImageActivity extends AppCompatActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pickup_image);
+    }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        final ActionBar ab = getSupportActionBar();
-        assert ab != null;
-        ab.setDisplayHomeAsUpEnabled(true);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_pickup_image, container, false);
+        return view;
+    }
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        tvCurrentAlbumName = (TextView) findViewById(R.id.tv_current_album_name);
-        viewDummy = (ImageView) findViewById(R.id.view_dummy);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        tvCurrentAlbumName = (TextView) view.findViewById(R.id.tv_current_album_name);
+        viewDummy = (ImageView) view.findViewById(R.id.view_dummy);
         mDrawable = (TransitionDrawable) viewDummy.getDrawable();
 
-        rlBottomBar = (RelativeLayout) findViewById(R.id.rl_bottom);
+        rlBottomBar = (RelativeLayout) view.findViewById(R.id.rl_bottom);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
-        mLayoutManager = new GridLayoutManager(this, 3);
+        mLayoutManager = new GridLayoutManager(mRecyclerView.getContext(), 3);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+
+        tvCurrentAlbumName.setOnClickListener(this);
 
         getImageFromMedia();
 
@@ -75,14 +82,13 @@ public class PickupImageActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(adapter);
     }
 
-
-    public void onClickCurrentAlbumName(View v) {
+    public void onClickCurrentAlbumName() {
         // show popup window
-        View albumChooserView = View.inflate(this, R.layout.album_list, null);
+        View albumChooserView = View.inflate(getContext(), R.layout.album_list, null);
 
         RecyclerView recyclerView = (RecyclerView) albumChooserView.findViewById(R.id.album_recycler_view);
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(mLayoutManager);
 
         AlbumChooserAdapter adapter = new AlbumChooserAdapter();
@@ -91,14 +97,12 @@ public class PickupImageActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         float itemHeight = getResources().getDimension(R.dimen.album_selector_item_height);
+        int autoHeight = (int) (itemHeight * albumItems.size());
 
-        float maxHeight = getResources().getDisplayMetrics().heightPixels - 2 * itemHeight;
-        int totalHeight = (int) (itemHeight * adapter.getItemCount());
+        int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels - itemHeight * 2);
+        autoHeight = autoHeight > maxHeight ? maxHeight : autoHeight;
 
-        int fixableHeight = totalHeight > maxHeight ? (int) maxHeight : totalHeight;
-
-
-        final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, fixableHeight, true);
+        final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, autoHeight, true);
         popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popupWindow.showAtLocation(rlBottomBar, Gravity.LEFT | Gravity.BOTTOM, 0, rlBottomBar.getHeight());
@@ -130,8 +134,9 @@ public class PickupImageActivity extends AppCompatActivity {
         try {
             final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.ImageColumns.ORIENTATION};
             final String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
-            imageCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
+            imageCursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
             assert imageCursor != null;
+
 
             while (imageCursor.moveToNext()) {
                 PickupImageItem pickupImageItem = new PickupImageItem();
@@ -149,18 +154,18 @@ public class PickupImageActivity extends AppCompatActivity {
 
                 pickupImageItems.add(pickupImageItem);
 
-                // First
-                if (albumItems.size() == 0) {
 
+                // add album
+                if (TextUtils.isEmpty(lastAlbumName)) {
                     AlbumItem item = new AlbumItem();
                     item.setAlbumName(getString(R.string.pickup_image_all_images));
-                    item.setAlbumImageUrl(pickupImageItem.getImageUri());
+                    item.setAlbumImagePath(fullPath);
+                    item.setAlbumImageUrl(Uri.parse("file://" + fullPath));
                     albumItems.add(item);
-
-                } else {
-                    albumItems.get(0).increaseImageCount();
                 }
 
+                // All Images to increase
+                albumItems.get(0).increaseImageCount();
 
                 boolean isAddedAlbum = false;
                 for (AlbumItem albumItem : albumItems) {
@@ -175,15 +180,9 @@ public class PickupImageActivity extends AppCompatActivity {
                     item.setAlbumName(albumName);
                     item.setAlbumImagePath(fullPath);
                     item.setAlbumImageUrl(Uri.parse("file://" + fullPath));
-                    item.setImageCount(1);
                     albumItems.add(item);
                 }
                 lastAlbumName = albumName;
-//
-//                Uri uri = Uri.parse("file://" + imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA)));
-//                int orientation = imageCursor.getInt(imageCursor.getColumnIndex(MediaStore.Images.ImageColumns.ORIENTATION));
-
-//                adapter.mContent.add(uri);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -195,14 +194,11 @@ public class PickupImageActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tv_current_album_name:
+                onClickCurrentAlbumName();
                 break;
         }
-        return super.onOptionsItemSelected(item);
     }
-
-
 }

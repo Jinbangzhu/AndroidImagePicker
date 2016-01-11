@@ -21,7 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PickupImageActivity" android:label="图片" />
+        <activity
+            android:name=".PickupImageActivity"
+            android:label="图片"
+            android:theme="@style/AppTheme.NoActionBar" />
 
     </application>
 
