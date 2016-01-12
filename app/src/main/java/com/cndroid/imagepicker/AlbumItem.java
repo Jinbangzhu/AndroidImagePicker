@@ -47,5 +47,15 @@ public class AlbumItem {
         this.imageCount = imageCount;
     }
 
-    private int imageCount ;
+    private int imageCount;
+
+    public boolean isChoosed() {
+        return isChoosed;
+    }
+
+    public void setChoosed(boolean isChoosed) {
+        this.isChoosed = isChoosed;
+    }
+
+    private boolean isChoosed;
 }

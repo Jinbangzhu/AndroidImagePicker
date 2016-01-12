@@ -105,7 +105,7 @@ public class PickupImageActivity extends AppCompatActivity {
         final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, fixableHeight, true);
         popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.showAtLocation(rlBottomBar, Gravity.BOTTOM, 0, rlBottomBar.getHeight() + getSoftButtonsBarSizePort());
+        popupWindow.showAtLocation(rlBottomBar, Gravity.BOTTOM, 0, rlBottomBar.getHeight());
         mDrawableDummy.startTransition(200);
         mDrawableAlbumNameBar.startTransition(200);
 
@@ -161,6 +161,7 @@ public class PickupImageActivity extends AppCompatActivity {
                     AlbumItem item = new AlbumItem();
                     item.setAlbumName(getString(R.string.pickup_image_all_images));
                     item.setAlbumImageUrl(pickupImageItem.getImageUri());
+                    item.setChoosed(true);
                     albumItems.add(item);
 
                 } else {

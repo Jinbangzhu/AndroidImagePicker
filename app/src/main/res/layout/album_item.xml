@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:clickable="true"
-    android:background="?attr/selectableItemBackground"
     android:layout_width="match_parent"
-    android:paddingTop="@dimen/pi_album_item_divider_height"
-    android:layout_height="@dimen/pi_album_selector_item_height">
+    android:layout_height="@dimen/pi_album_selector_item_height"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:paddingTop="@dimen/pi_album_item_divider_height">
 
     <ImageView
         android:id="@+id/iv_album_cover"
@@ -15,6 +15,15 @@
         android:layout_marginRight="8dp"
         android:background="#88000000"
         android:scaleType="centerCrop" />
+
+    <ImageView
+        android:id="@+id/iv_choosed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"
+        android:src="@mipmap/ic_check_black_24dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"

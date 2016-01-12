@@ -2,5 +2,6 @@
     android:id="@+id/album_recycler_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/pi_album_item_divider_height"
     android:background="#FFF"
     android:scrollbars="vertical" />

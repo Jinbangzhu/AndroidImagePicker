@@ -37,6 +37,8 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
                 .into(holder.imageView);
         holder.tvAlbumName.setText(albumItem.getAlbumName());
         holder.tvAlbumImageCount.setText(holder.imageView.getContext().getString(R.string.pickup_image_count_unit, albumItem.getImageCount()));
+        holder.ivIsChoosed.setVisibility(albumItem.isChoosed() ? View.VISIBLE : View.GONE);
+//        if (albumItem.is)
     }
 
     @Override
@@ -50,12 +52,13 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
 
-        private ImageView imageView;
+        private ImageView imageView, ivIsChoosed;
         private TextView tvAlbumName, tvAlbumImageCount;
 
         public ViewHolder(View v) {
             super(v);
             imageView = (ImageView) v.findViewById(R.id.iv_album_cover);
+            ivIsChoosed = (ImageView) v.findViewById(R.id.iv_choosed);
             tvAlbumName = (TextView) v.findViewById(R.id.tv_album_name);
             tvAlbumImageCount = (TextView) v.findViewById(R.id.tv_album_image_count);
         }
