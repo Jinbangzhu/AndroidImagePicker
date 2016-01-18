@@ -35,6 +35,7 @@ public class PickupImageActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private List<PickupImageItem> pickupImageItems;
+    private List<PickupImageItem> filterPickupImageItems = new ArrayList<>();
     private List<AlbumItem> albumItems;
 
     private TextView tvCurrentAlbumName;
@@ -42,6 +43,7 @@ public class PickupImageActivity extends AppCompatActivity {
     private RelativeLayout rlBottomBar;
     private TransitionDrawable mDrawableDummy, mDrawableAlbumNameBar;
 
+    private PickupImageAdapter pickupImageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +76,11 @@ public class PickupImageActivity extends AppCompatActivity {
 
         getImageFromMedia();
 
-        PickupImageAdapter adapter = new PickupImageAdapter();
-        adapter.setImageItemList(pickupImageItems);
-        mRecyclerView.setAdapter(adapter);
+        filterPickupImageItems.addAll(pickupImageItems);
+
+        pickupImageAdapter = new PickupImageAdapter();
+        pickupImageAdapter.setImageItemList(filterPickupImageItems);
+        mRecyclerView.setAdapter(pickupImageAdapter);
     }
 
 
@@ -89,7 +93,7 @@ public class PickupImageActivity extends AppCompatActivity {
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
-        AlbumChooserAdapter adapter = new AlbumChooserAdapter();
+        final AlbumChooserAdapter adapter = new AlbumChooserAdapter();
         adapter.setAlbumItems(albumItems);
 
         recyclerView.setAdapter(adapter);
@@ -121,6 +125,29 @@ public class PickupImageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 popupWindow.dismiss();
 
+            }
+        });
+
+        adapter.setOnItemClickListener(new AlbumChooserAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClicked(AlbumItem item, int position) {
+                popupWindow.dismiss();
+                adapter.unChooseAll();
+                item.setChoosed(true);
+                tvCurrentAlbumName.setText(item.getAlbumName());
+
+                filterPickupImageItems.clear();
+
+                if (position == 0) {// All
+                    filterPickupImageItems.addAll(pickupImageItems);
+                } else {// filter
+                    for (PickupImageItem imageItem : pickupImageItems) {
+                        if (imageItem.getAlbumName().equals(item.getAlbumName())) {
+                            filterPickupImageItems.add(imageItem);
+                        }
+                    }
+                }
+                pickupImageAdapter.notifyDataSetChanged();
             }
         });
 

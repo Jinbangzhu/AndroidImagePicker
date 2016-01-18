@@ -30,20 +30,44 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        AlbumItem albumItem = albumItems.get(position);
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        final AlbumItem albumItem = albumItems.get(position);
         Glide.with(holder.imageView.getContext())
                 .load(albumItem.getAlbumImageUrl())
                 .into(holder.imageView);
         holder.tvAlbumName.setText(albumItem.getAlbumName());
         holder.tvAlbumImageCount.setText(holder.imageView.getContext().getString(R.string.pickup_image_count_unit, albumItem.getImageCount()));
         holder.ivIsChoosed.setVisibility(albumItem.isChoosed() ? View.VISIBLE : View.GONE);
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != onItemClickListener)
+                    onItemClickListener.onItemClicked(albumItem, position);
+            }
+        });
 //        if (albumItem.is)
     }
 
     @Override
     public int getItemCount() {
         return albumItems.size();
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    private OnItemClickListener onItemClickListener;
+
+    public interface OnItemClickListener {
+        void onItemClicked(AlbumItem item, int position);
+    }
+
+
+    public void unChooseAll() {
+        for (AlbumItem item : albumItems) {
+            item.setChoosed(false);
+        }
     }
 
     // Provide a reference to the views for each data item
@@ -54,6 +78,7 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
 
         private ImageView imageView, ivIsChoosed;
         private TextView tvAlbumName, tvAlbumImageCount;
+        private View view;
 
         public ViewHolder(View v) {
             super(v);
@@ -61,6 +86,7 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
             ivIsChoosed = (ImageView) v.findViewById(R.id.iv_choosed);
             tvAlbumName = (TextView) v.findViewById(R.id.tv_album_name);
             tvAlbumImageCount = (TextView) v.findViewById(R.id.tv_album_image_count);
+            view = v;
         }
     }
 
