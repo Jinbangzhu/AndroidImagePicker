@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
@@ -29,10 +28,19 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        final PickupImageItem item = imageItemList.get(position);
         Glide.with(holder.imageView.getContext())
-                .load(imageItemList.get(position).getImageUri())
+                .load(item.getImageUri())
                 .into(holder.imageView);
+        holder.imageView.isSelected(item.isSelected());
+        holder.imageView.setTapListener(new SelectableImageView.ITapListener() {
+            @Override
+            public void onTaped() {
+                item.setSelected(!item.isSelected());
+                notifyItemChanged(position);
+            }
+        });
     }
 
     @Override
@@ -46,10 +54,11 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
 
-        private ImageView imageView;
+        private SelectableImageView imageView;
+
         public ViewHolder(View v) {
             super(v);
-            imageView = (ImageView) v.findViewById(R.id.iv_image);
+            imageView = (SelectableImageView) v.findViewById(R.id.iv_image);
         }
     }
 

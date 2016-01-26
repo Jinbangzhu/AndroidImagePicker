@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SelectableImageView">
+        <attr name="pi_selectable" format="boolean" />
+        <attr name="pi_selectedColor" format="color" />
+
+    </declare-styleable>
+</resources>

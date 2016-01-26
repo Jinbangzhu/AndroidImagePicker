@@ -7,4 +7,5 @@
     <color name="pickup.image.dummy.transparent">@android:color/transparent</color>
     <color name="pickup.image.album_name_bar_default">#BB000000</color>
     <color name="pickup.image.album_name_bar_dark">@android:color/black</color>
+    <color name="pickup.image.selected_image_bg">#44000000</color>
 </resources>
