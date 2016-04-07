@@ -1,4 +1,4 @@
-package com.cndroid.imagepicker;
+package com.cndroid.imagepicker.bean;
 
 import android.net.Uri;
 

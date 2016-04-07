@@ -4,6 +4,8 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.cndroid.imagepicker.bean.PickupImageItem;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.cndroid.imagepicker;
+package com.cndroid.imagepicker.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,6 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.cndroid.imagepicker.bean.PickupImageItem;
+import com.cndroid.imagepicker.R;
+import com.cndroid.imagepicker.views.SelectableImageView;
 
 import java.util.List;
 

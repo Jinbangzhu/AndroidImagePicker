@@ -1,88 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/drawer_layout"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context="com.cndroid.imagepicker.MainActivity">
 
 
-    <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.cndroid.imagepicker.MainActivity">
+        android:layout_above="@+id/rl_bottom"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:layout_scrollFlags="scroll|enterAlways|snap"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
-
-        </android.support.design.widget.AppBarLayout>
-
-
-        <RelativeLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/rl_bottom"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            android:scrollbars="vertical" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbars="vertical" />
+    </RelativeLayout>
 
-        </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/view_dummy"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/rl_bottom"
+        android:src="@drawable/pickup_image_dummy" />
+
+
+    <RelativeLayout
+        android:id="@+id/rl_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/pi_album_name_bar_height"
+        android:layout_gravity="bottom">
 
         <ImageView
-            android:id="@+id/view_dummy"
+            android:id="@+id/iv_album_name_bar_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/rl_bottom"
-            android:src="@drawable/pickup_image_dummy" />
+            android:src="@drawable/pickup_image_album_name_bar_background" />
 
+        <TextView
+            android:id="@+id/tv_current_album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackground"
+            android:drawableRight="@drawable/ip_corner"
+            android:gravity="center"
+            android:onClick="onClickCurrentAlbumName"
+            android:paddingLeft="8dp"
+            android:text="Album"
+            android:textColor="#FFF" />
 
-        <RelativeLayout
-            android:id="@+id/rl_bottom"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/pi_album_name_bar_height"
-            android:layout_gravity="bottom">
+        <include layout="@layout/pi_layout_part_done_with_count" />
 
-            <ImageView
-                android:id="@+id/iv_album_name_bar_background"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/pickup_image_album_name_bar_background" />
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
 
-            <TextView
-                android:id="@+id/tv_current_album_name"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:background="?attr/selectableItemBackground"
-                android:drawableRight="@drawable/ip_corner"
-                android:onClick="onClickCurrentAlbumName"
-                android:paddingLeft="8dp"
-                android:text="Album"
-                android:textColor="#FFF" />
-
-            <include layout="@layout/pi_layout_part_done_with_count" />
-
-        </RelativeLayout>
-    </android.support.design.widget.CoordinatorLayout>
-
-</android.support.v4.widget.DrawerLayout>

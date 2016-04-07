@@ -1,7 +1,6 @@
 package com.cndroid.imagepicker;
 
 import android.database.Cursor;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,8 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.cndroid.imagepicker.adapter.AlbumChooserAdapter;
+import com.cndroid.imagepicker.adapter.PickupImageAdapter;
+import com.cndroid.imagepicker.bean.AlbumItem;
+import com.cndroid.imagepicker.bean.PickupImageItem;
 
 import java.util.ArrayList;
 import java.util.List;

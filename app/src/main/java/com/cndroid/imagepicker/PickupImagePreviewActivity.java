@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.cndroid.imagepicker.bean.PickupImageItem;
 import com.cndroid.imagepicker.views.CustomTouchScrollViewPager;
 
 import java.util.List;

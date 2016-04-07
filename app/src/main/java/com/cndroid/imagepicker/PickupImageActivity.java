@@ -21,6 +21,11 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.cndroid.imagepicker.adapter.AlbumChooserAdapter;
+import com.cndroid.imagepicker.adapter.PickupImageAdapter;
+import com.cndroid.imagepicker.bean.AlbumItem;
+import com.cndroid.imagepicker.bean.PickupImageItem;
+
 import java.util.ArrayList;
 import java.util.List;
 

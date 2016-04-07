@@ -1,8 +1,7 @@
-package com.cndroid.imagepicker;
+package com.cndroid.imagepicker.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
 /**
  * Created by jinbangzhu on 1/8/16.

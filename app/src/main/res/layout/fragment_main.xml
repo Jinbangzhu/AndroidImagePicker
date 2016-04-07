@@ -23,34 +23,11 @@
         android:layout_below="@+id/textView"
         android:text="pick up single image" />
 
-    <com.cndroid.imagepicker.SelectableImageView
+    <com.cndroid.imagepicker.views.SelectableImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:src="@mipmap/ic_launcher"
         app:pi_selectedColor="#44000000" />
-
-    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/card_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_gravity="center"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        card_view:cardCornerRadius="5dp"
-        card_view:cardPreventCornerOverlap="false">
-
-        <TextView
-            android:text="SELECT"
-            android:layout_width="match_parent"
-            android:layout_height="200dp" />
-
-    </android.support.v7.widget.CardView>
 
 </RelativeLayout>

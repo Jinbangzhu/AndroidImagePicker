@@ -1,4 +1,4 @@
-package com.cndroid.imagepicker;
+package com.cndroid.imagepicker.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+
+import com.cndroid.imagepicker.R;
 
 /**
  * Created by jinbangzhu on 1/18/16.
