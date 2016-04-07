@@ -1,13 +1,13 @@
 package com.cndroid.imagepicker;
 
+import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -15,13 +15,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -31,18 +28,21 @@ import java.util.List;
  * Created by jinbangzhu on 1/8/16.
  */
 public class PickupImageActivity extends AppCompatActivity {
+    public static final int RESULT_CODE_DONE = 0x1;
+    public static final int RESULT_CODE_REFRESH = 0x2;
+    public static final int RESULT_CODE_CANCEL = 0x4;
+    public static final int REQUEST_CODE_PREVIEW = 0x3;
+    public static final String RESULT_IMAGES = "result_images_url";
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
     private List<PickupImageItem> pickupImageItems;
     private List<PickupImageItem> filterPickupImageItems = new ArrayList<>();
+
+    // Album name
     private List<AlbumItem> albumItems;
 
     private TextView tvCurrentAlbumName;
-    private ImageView viewDummy, ivAlbumNameBarBackground;
-    private RelativeLayout rlBottomBar;
-    private TransitionDrawable mDrawableDummy, mDrawableAlbumNameBar;
-
+    private TextView tvSelectedCount, tvDone;
+    private LinearLayout llDone;
     private PickupImageAdapter pickupImageAdapter;
 
     @Override
@@ -50,39 +50,128 @@ public class PickupImageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pickup_image);
 
+        /**
+         * default result code is cancel
+         *
+         * when user chosen image, result is RESULT_CODE_DONE
+         */
+        setResult(RESULT_CODE_CANCEL);
+
+        initialToolBar();
+        initialSelectedCountText();
+
+        RecyclerView mRecyclerView = initialRecyclerView();
+
+        getImageFromMedia();
+
+        filterPickupImageItems.addAll(pickupImageItems);
+
+        PickupImageHolder.getInstance().setPickupImageItems(pickupImageItems);
+        PickupImageHolder.getInstance().setFilterPickupImageItems(filterPickupImageItems);
+
+        setAdapter(mRecyclerView);
+
+        initialDoneListener();
+    }
+
+    private void initialDoneListener() {
+        llDone = (LinearLayout) findViewById(R.id.ll_done);
+        llDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                done();
+            }
+        });
+    }
+
+    private void initialSelectedCountText() {
+        tvSelectedCount = (TextView) findViewById(R.id.tv_selected_count);
+        tvDone = (TextView) findViewById(R.id.tv_done);
+    }
+
+    private void setAdapter(RecyclerView mRecyclerView) {
+        pickupImageAdapter = new PickupImageAdapter();
+        pickupImageAdapter.setImageItemList(filterPickupImageItems);
+        pickupImageAdapter.setOnItemClickListener(new PickupImageAdapter.OnItemClickListener() {
+            @Override
+            public void onImageViewTaped(int position) {
+                startActivityForResult(new Intent(PickupImageActivity.this, PickupImagePreviewActivity.class).putExtra("position", position), REQUEST_CODE_PREVIEW);
+            }
+
+            @Override
+            public void onCheckBoxImageChecked(PickupImageItem item, int position) {
+                item.setSelected(!item.isSelected());
+                PickupImageHolder.getInstance().processSelectedCount(item, tvSelectedCount, tvDone);
+                pickupImageAdapter.notifyItemChanged(position);
+            }
+        });
+        mRecyclerView.setAdapter(pickupImageAdapter);
+    }
+
+    @NonNull
+    private RecyclerView initialRecyclerView() {
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        tvCurrentAlbumName = (TextView) findViewById(R.id.tv_current_album_name);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        assert mRecyclerView != null;
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 3);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        return mRecyclerView;
+    }
+
+    private void initialToolBar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        tvCurrentAlbumName = (TextView) findViewById(R.id.tv_current_album_name);
-        viewDummy = (ImageView) findViewById(R.id.view_dummy);
-        ivAlbumNameBarBackground = (ImageView) findViewById(R.id.iv_album_name_bar_background);
-        mDrawableDummy = (TransitionDrawable) viewDummy.getDrawable();
-        mDrawableAlbumNameBar = (TransitionDrawable) ivAlbumNameBarBackground.getDrawable();
-
-        rlBottomBar = (RelativeLayout) findViewById(R.id.rl_bottom);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        mLayoutManager = new GridLayoutManager(this, 3);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
-
-        getImageFromMedia();
-
-        filterPickupImageItems.addAll(pickupImageItems);
-
-        pickupImageAdapter = new PickupImageAdapter();
-        pickupImageAdapter.setImageItemList(filterPickupImageItems);
-        mRecyclerView.setAdapter(pickupImageAdapter);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_PREVIEW) {
+            if (resultCode == RESULT_CODE_REFRESH) {
+                refreshAdapter();
+            } else if (resultCode == RESULT_CODE_DONE) {
+                done();
+            }
+        }
+    }
+
+    /**
+     * Done
+     */
+    private void done() {
+        setResult(RESULT_CODE_DONE);
+        // put selected images to intentData
+        getIntent().putExtra(RESULT_IMAGES, PickupImageHolder.getInstance().getSelectedImagesUrl());
+
+
+        // flush cached data
+        PickupImageHolder.getInstance().flush();
+
+        onBackPressed();
+    }
+
+
+    private void refreshAdapter() {
+        if (null != pickupImageAdapter) {
+            pickupImageAdapter.notifyDataSetChanged();
+        }
+        PickupImageHolder.getInstance().setupTextViewState(tvSelectedCount, tvDone);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
 
     public void onClickCurrentAlbumName(View v) {
         // show popup window
@@ -104,36 +193,18 @@ public class PickupImageActivity extends AppCompatActivity {
         int totalHeight = (int) (itemHeight * adapter.getItemCount());
 
         int fixableHeight = totalHeight > maxHeight ? (int) maxHeight : totalHeight;
+        albumChooserView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, fixableHeight));
 
-
-        final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, fixableHeight, true);
-        popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.showAtLocation(rlBottomBar, Gravity.BOTTOM, 0, rlBottomBar.getHeight());
-        mDrawableDummy.startTransition(200);
-        mDrawableAlbumNameBar.startTransition(200);
-
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                mDrawableDummy.reverseTransition(200);
-                mDrawableAlbumNameBar.reverseTransition(200);
-            }
-        });
-        albumChooserView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-
-            }
-        });
+        final BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setContentView(albumChooserView);
+        dialog.show();
 
         adapter.setOnItemClickListener(new AlbumChooserAdapter.OnItemClickListener() {
             @Override
             public void onItemClicked(AlbumItem item, int position) {
-                popupWindow.dismiss();
+                dialog.cancel();
                 adapter.unChooseAll();
-                item.setChoosed(true);
+                item.setHasChosen(true);
                 tvCurrentAlbumName.setText(item.getAlbumName());
 
                 filterPickupImageItems.clear();
@@ -184,13 +255,11 @@ public class PickupImageActivity extends AppCompatActivity {
 
                 // First
                 if (albumItems.size() == 0) {
-
                     AlbumItem item = new AlbumItem();
                     item.setAlbumName(getString(R.string.pickup_image_all_images));
                     item.setAlbumImageUrl(pickupImageItem.getImageUri());
-                    item.setChoosed(true);
+                    item.setHasChosen(true);
                     albumItems.add(item);
-
                 } else {
                     albumItems.get(0).increaseImageCount();
                 }

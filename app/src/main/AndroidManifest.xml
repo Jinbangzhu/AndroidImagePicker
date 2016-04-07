@@ -26,6 +26,10 @@
             android:label="图片"
             android:theme="@style/AppTheme.NoActionBar" />
 
+        <activity
+            android:name=".PickupImagePreviewActivity"
+            android:theme="@style/BlackTheme" />
+
     </application>
 
 </manifest>

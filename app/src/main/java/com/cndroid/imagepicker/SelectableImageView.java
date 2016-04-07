@@ -34,9 +34,10 @@ public class SelectableImageView extends ImageView {
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SelectableImageView, 0, 0);
         try {
             selectedColor = typedArray.getColor(R.styleable.SelectableImageView_pi_selectedColor, getResources().getColor(R.color.pickup_image_selected_image_bg));
-            typedArray.recycle();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            typedArray.recycle();
         }
     }
 
@@ -48,8 +49,7 @@ public class SelectableImageView extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (touched || isSelected)
-            canvas.drawColor(selectedColor);
+        if (touched || isSelected) canvas.drawColor(selectedColor);
     }
 
     public void setTapListener(ITapListener iTapListener) {

@@ -37,7 +37,7 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
                 .into(holder.imageView);
         holder.tvAlbumName.setText(albumItem.getAlbumName());
         holder.tvAlbumImageCount.setText(holder.imageView.getContext().getString(R.string.pickup_image_count_unit, albumItem.getImageCount()));
-        holder.ivIsChoosed.setVisibility(albumItem.isChoosed() ? View.VISIBLE : View.GONE);
+        holder.ivIsChoosed.setVisibility(albumItem.isHasChosen() ? View.VISIBLE : View.GONE);
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,7 +66,7 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
 
     public void unChooseAll() {
         for (AlbumItem item : albumItems) {
-            item.setChoosed(false);
+            item.setHasChosen(false);
         }
     }
 

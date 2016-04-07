@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
@@ -28,19 +29,45 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         final PickupImageItem item = imageItemList.get(position);
         Glide.with(holder.imageView.getContext())
                 .load(item.getImageUri())
                 .into(holder.imageView);
         holder.imageView.isSelected(item.isSelected());
+
+        if (item.isSelected()) {
+            holder.imageViewCheckState.setImageResource(R.mipmap.ip_icon_check_on);
+        } else {
+            holder.imageViewCheckState.setImageResource(R.mipmap.ip_icon_check_off);
+        }
+
+        holder.imageViewCheckState.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != onItemClickListener)
+                    onItemClickListener.onCheckBoxImageChecked(item, position);
+            }
+        });
         holder.imageView.setTapListener(new SelectableImageView.ITapListener() {
             @Override
             public void onTaped() {
-                item.setSelected(!item.isSelected());
-                notifyItemChanged(position);
+                if (null != onItemClickListener)
+                    onItemClickListener.onImageViewTaped(position);
             }
         });
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    private OnItemClickListener onItemClickListener;
+
+    public interface OnItemClickListener {
+        void onImageViewTaped(int position);
+
+        void onCheckBoxImageChecked(PickupImageItem item, int position);
     }
 
     @Override
@@ -55,10 +82,12 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
         // each data item is just a string in this case
 
         private SelectableImageView imageView;
+        private ImageView imageViewCheckState;
 
         public ViewHolder(View v) {
             super(v);
             imageView = (SelectableImageView) v.findViewById(R.id.iv_image);
+            imageViewCheckState = (ImageView) v.findViewById(R.id.iv_check_state);
         }
     }
 

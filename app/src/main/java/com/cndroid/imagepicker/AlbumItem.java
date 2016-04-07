@@ -49,13 +49,13 @@ public class AlbumItem {
 
     private int imageCount;
 
-    public boolean isChoosed() {
-        return isChoosed;
+    public boolean isHasChosen() {
+        return hasChosen;
     }
 
-    public void setChoosed(boolean isChoosed) {
-        this.isChoosed = isChoosed;
+    public void setHasChosen(boolean hasChosen) {
+        this.hasChosen = hasChosen;
     }
 
-    private boolean isChoosed;
+    private boolean hasChosen;
 }

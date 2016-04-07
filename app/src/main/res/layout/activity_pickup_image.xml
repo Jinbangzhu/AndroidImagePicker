@@ -36,7 +36,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/rl_bottom"
-            android:layout_marginBottom="@dimen/pi_album_name_bar_height"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <android.support.v7.widget.RecyclerView
@@ -74,10 +73,14 @@
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
                 android:gravity="center"
+                android:background="?attr/selectableItemBackground"
+                android:drawableRight="@drawable/ip_corner"
                 android:onClick="onClickCurrentAlbumName"
                 android:paddingLeft="8dp"
                 android:text="Album"
                 android:textColor="#FFF" />
+
+            <include layout="@layout/pi_layout_part_done_with_count" />
 
         </RelativeLayout>
     </android.support.design.widget.CoordinatorLayout>

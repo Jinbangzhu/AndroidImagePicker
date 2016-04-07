@@ -1,24 +1,20 @@
 package com.cndroid.imagepicker;
 
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,15 +26,8 @@ import java.util.List;
  */
 public class PickupImageFragment extends Fragment implements View.OnClickListener {
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
     private List<PickupImageItem> pickupImageItems;
     private List<AlbumItem> albumItems;
-
-    private TextView tvCurrentAlbumName;
-    private ImageView viewDummy;
-    private RelativeLayout rlBottomBar;
-    private TransitionDrawable mDrawable;
 
 
     @Override
@@ -58,18 +47,15 @@ public class PickupImageFragment extends Fragment implements View.OnClickListene
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        tvCurrentAlbumName = (TextView) view.findViewById(R.id.tv_current_album_name);
-        viewDummy = (ImageView) view.findViewById(R.id.view_dummy);
-        mDrawable = (TransitionDrawable) viewDummy.getDrawable();
-
-        rlBottomBar = (RelativeLayout) view.findViewById(R.id.rl_bottom);
+        RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        TextView tvCurrentAlbumName = (TextView) view.findViewById(R.id.tv_current_album_name);
+        ImageView viewDummy = (ImageView) view.findViewById(R.id.view_dummy);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
-        mLayoutManager = new GridLayoutManager(mRecyclerView.getContext(), 3);
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(mRecyclerView.getContext(), 3);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
 
@@ -102,25 +88,33 @@ public class PickupImageFragment extends Fragment implements View.OnClickListene
         int maxHeight = (int) (getResources().getDisplayMetrics().heightPixels - itemHeight * 2);
         autoHeight = autoHeight > maxHeight ? maxHeight : autoHeight;
 
-        final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, autoHeight, true);
-        popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.showAtLocation(rlBottomBar, Gravity.LEFT | Gravity.BOTTOM, 0, rlBottomBar.getHeight());
-        mDrawable.startTransition(200);
 
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                mDrawable.reverseTransition(200);
-            }
-        });
-        albumChooserView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
+        BottomSheetDialog dialog = new BottomSheetDialog(getContext());
+        albumChooserView.getLayoutParams().height = autoHeight;
+        dialog.setContentView(albumChooserView);
 
-            }
-        });
+//        dialog.show();
+
+
+//        final PopupWindow popupWindow = new PopupWindow(albumChooserView, LinearLayout.LayoutParams.MATCH_PARENT, autoHeight, true);
+//        popupWindow.setAnimationStyle(R.style.PickupImageAlbumChooserAnimation);
+//        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+//        popupWindow.showAtLocation(rlBottomBar, Gravity.LEFT | Gravity.BOTTOM, 0, rlBottomBar.getHeight());
+//        mDrawable.startTransition(200);
+//
+//        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//            @Override
+//            public void onDismiss() {
+//                mDrawable.reverseTransition(200);
+//            }
+//        });
+//        albumChooserView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                popupWindow.dismiss();
+//
+//            }
+//        });
 
     }
 
