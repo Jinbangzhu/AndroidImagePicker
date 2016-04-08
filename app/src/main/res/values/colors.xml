@@ -3,11 +3,4 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="pickup.image.dummy">#88000000</color>
-    <color name="pickup.image.dummy.transparent">@android:color/transparent</color>
-    <color name="pickup.image.album_name_bar_default">#BB000000</color>
-    <color name="pickup.image.album_name_bar_dark">@android:color/black</color>
-    <color name="pickup.image.selected_image_bg">#44000000</color>
-    <color name="pickup.image.preview.bar.bg">#99000000</color>
-    <color name="pickup.image.preview.done.text.color">#AA00FF00</color>
 </resources>

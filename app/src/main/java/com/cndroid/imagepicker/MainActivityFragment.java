@@ -1,16 +1,21 @@
 package com.cndroid.imagepicker;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cndroid.pickimagelib.PickupImageBuilder;
+import com.cndroid.pickimagelib.PickupImageCallBack;
+
+import java.util.List;
+
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment implements View.OnClickListener {
+public class MainActivityFragment extends Fragment implements View.OnClickListener, PickupImageCallBack {
 
     public MainActivityFragment() {
     }
@@ -29,8 +34,17 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_pickup_single_image:
-                startActivity(new Intent(getActivity(), PickupImageActivity.class));
+                PickupImageBuilder.with(getActivity())
+                        .setTitle("选择要导入的脚印")
+                        .defaultChosen()
+                        .registerCallBackListener(this)
+                        .startPickupImage();
                 break;
         }
+    }
+
+    @Override
+    public void onGetUserChosenImages(List<String> imageUrls) {
+        Log.d("getUserChosenImages", imageUrls.toString());
     }
 }

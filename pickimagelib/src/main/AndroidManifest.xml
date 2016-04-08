@@ -3,8 +3,16 @@
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
         android:supportsRtl="true">
+
+        <activity
+            android:name="com.cndroid.pickimagelib.PickupImageActivity"
+            android:label="@string/pi_str_choose_image"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name="com.cndroid.pickimagelib.PickupImagePreviewActivity"
+            android:theme="@style/BlackTheme" />
 
     </application>
 
