@@ -145,7 +145,11 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return PickupImagePagerItemFragment.getInstance(imageItemList.get(position));
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("imageItem", imageItemList.get(position));
+            PickupImagePagerItemFragment fragment = new PickupImagePagerItemFragment();
+            fragment.setArguments(bundle);
+            return fragment;
         }
 
         @Override

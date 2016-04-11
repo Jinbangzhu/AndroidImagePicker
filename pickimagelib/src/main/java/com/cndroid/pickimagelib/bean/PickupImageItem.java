@@ -2,10 +2,12 @@ package com.cndroid.pickimagelib.bean;
 
 import android.net.Uri;
 
+import java.io.Serializable;
+
 /**
  * Created by jinbangzhu on 1/8/16.
  */
-public class PickupImageItem {
+public class PickupImageItem implements Serializable{
     public boolean isSelected() {
         return selected;
     }

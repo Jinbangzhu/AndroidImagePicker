@@ -27,28 +27,13 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <RelativeLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/rl_bottom"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-
-    </RelativeLayout>
-
-
-    <ImageView
-        android:id="@+id/view_dummy"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/rl_bottom"
-        android:src="@drawable/pickup_image_dummy" />
-
+        android:scrollbars="vertical"
+        android:paddingBottom="@dimen/pi_album_name_bar_height"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <RelativeLayout
         android:id="@+id/rl_bottom"

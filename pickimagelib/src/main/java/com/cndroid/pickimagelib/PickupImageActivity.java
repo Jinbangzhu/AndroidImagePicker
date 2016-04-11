@@ -39,7 +39,6 @@ public class PickupImageActivity extends AppCompatActivity {
     public static final int RESULT_CODE_CANCEL = 0x4;
     public static final int REQUEST_CODE_PREVIEW = 0x3;
     public static final int REQUEST_CODE_PICKUP = 0x5;
-    public static final String RESULT_IMAGES = "result_images_url";
 
     private List<PickupImageItem> pickupImageItems;
     private List<PickupImageItem> filterPickupImageItems = new ArrayList<>();
