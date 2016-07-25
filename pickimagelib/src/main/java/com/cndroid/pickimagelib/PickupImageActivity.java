@@ -31,7 +31,6 @@ import com.cndroid.pickimagelib.bean.PickupImageItem;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by jinbangzhu on 1/8/16.
@@ -117,14 +116,14 @@ public class PickupImageActivity extends AppCompatActivity {
             @Override
             public void onImageViewTaped(int position) {
                 startActivityForResult(new Intent(PickupImageActivity.this, PickupImagePreviewActivity.class)
-                        .putExtra("pickupImageHolder", pickupImageHolder)
-                        .putExtra("position", position), REQUEST_CODE_PREVIEW);
+                        .putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder)
+                        .putExtra(Intents.ImagePicker.POSITION, position), REQUEST_CODE_PREVIEW);
             }
 
             @Override
             public void onCheckBoxImageChecked(PickupImageItem item, int position) {
                 if (pickupImageHolder.isFull() && !item.isSelected()) {
-                    Toast.makeText(getApplicationContext(), String.format(Locale.getDefault(), "最多%d个", pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.pi_max_allow, pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
                 } else {
                     item.setSelected(!item.isSelected());
                     pickupImageHolder.processSelectedCount(item);
@@ -160,10 +159,10 @@ public class PickupImageActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         Bundle bundle = getIntent().getExtras();
         if (null != bundle) {
-            String title = bundle.getString("title");
+            String title = bundle.getString(Intents.ImagePicker.TITLE);
             if (!TextUtils.isEmpty(title)) ab.setTitle(title);
 
-            int titleRes = bundle.getInt("titleRes", 0);
+            int titleRes = bundle.getInt(Intents.ImagePicker.TITLERES, 0);
             if (titleRes != 0) ab.setTitle(titleRes);
         }
     }
@@ -172,7 +171,7 @@ public class PickupImageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PREVIEW) {
-            pickupImageHolder = (PickupImageHolder) data.getSerializableExtra("pickupImageHolder");
+            pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
             pickupImageItems = pickupImageHolder.getPickupImageItems();
             filterPickupImageItems = pickupImageHolder.getFilterPickupImageItems();
             pickupImageAdapter.setImageItemList(pickupImageHolder.getFilterPickupImageItems());
@@ -212,7 +211,6 @@ public class PickupImageActivity extends AppCompatActivity {
     }
 
     public void onClickCurrentAlbumName(View v) {
-        // show popup window
         View albumChooserView = View.inflate(this, R.layout.pi_layout_album_list, null);
 
         RecyclerView recyclerView = (RecyclerView) albumChooserView.findViewById(R.id.album_recycler_view);
@@ -274,12 +272,12 @@ public class PickupImageActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if (null != bundle) {
-            startTime = bundle.getLong("startTime");
-            defaultChosenAll = bundle.getBoolean("defaultChosen", false);
-            dcimOnly = bundle.getBoolean("dcimOnly", false);
-            int limit = bundle.getInt("limit", Integer.MAX_VALUE);
+            startTime = bundle.getLong(Intents.ImagePicker.STARTTIME);
+            defaultChosenAll = bundle.getBoolean(Intents.ImagePicker.DEFAULTCHOSEN, false);
+            dcimOnly = bundle.getBoolean(Intents.ImagePicker.DCIMONLY, false);
+            int limit = bundle.getInt(Intents.ImagePicker.LIMIT, Integer.MAX_VALUE);
             pickupImageHolder.setLimit(limit);
-            selectedImages = bundle.getStringArray("selectedImages");
+            selectedImages = bundle.getStringArray(Intents.ImagePicker.SELECTEDIMAGES);
             // millisecond to second
             if (String.valueOf(startTime).length() > 10) startTime /= 1000;
         }
@@ -302,8 +300,8 @@ public class PickupImageActivity extends AppCompatActivity {
                 PickupImageItem pickupImageItem = new PickupImageItem();
 
 
-                String imgPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
-                String albumName = imgPath.substring(imgPath.lastIndexOf("/") + 1, imgPath.length());
+                String imgPath = fullPath.substring(0, fullPath.lastIndexOf(File.separator));
+                String albumName = imgPath.substring(imgPath.lastIndexOf(File.separator) + 1, imgPath.length());
                 long dateAdded = imageCursor.getLong(imageCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
 
                 pickupImageItem.setAlbumName(albumName);
@@ -380,22 +378,4 @@ public class PickupImageActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
-
-    private int getSoftButtonsBarSizePort() {
-        // getRealMetrics is only available with API 17 and +
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            int usableHeight = metrics.heightPixels;
-            getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
-            int realHeight = metrics.heightPixels;
-            if (realHeight > usableHeight)
-                return realHeight - usableHeight;
-            else
-                return 0;
-        }
-        return 0;
-    }
-
 }

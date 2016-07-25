@@ -11,8 +11,6 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 
-import java.io.File;
-
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -38,10 +36,10 @@ public class PickupImagePagerItemFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         PhotoView photoView = (PhotoView) view.findViewById(R.id.iv_preview);
 
-        PickupImageItem imageItem = (PickupImageItem) getArguments().getSerializable("imageItem");
+        PickupImageItem imageItem = (PickupImageItem) getArguments().getSerializable(Intents.ImagePicker.IMAGEITEM);
         if (null == imageItem) return;
         Glide.with(getContext())
-                .load(Uri.fromFile(new File(imageItem.getImagePath())))
+                .load(Uri.parse("file://" + imageItem.getImagePath()))
                 .into(photoView);
     }
 }

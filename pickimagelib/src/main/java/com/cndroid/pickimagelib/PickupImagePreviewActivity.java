@@ -21,7 +21,6 @@ import com.cndroid.pickimagelib.bean.PickupImageItem;
 import com.cndroid.pickimagelib.views.CustomTouchScrollViewPager;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by jinbangzhu on 4/6/16.
@@ -43,7 +42,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
         setContentView(R.layout.pi_layout_activity_pickup_image_pager);
         setResult(RESULT_CANCELED);
 
-        pickupImageHolder = (PickupImageHolder) getIntent().getSerializableExtra("pickupImageHolder");
+        pickupImageHolder = (PickupImageHolder) getIntent().getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
         initialActionBar();
         initialSelectedCountText();
 
@@ -62,7 +61,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.putExtra("pickupImageHolder", pickupImageHolder);
+                intent.putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder);
                 setResult(PickupImageActivity.RESULT_CODE_DONE, intent);
                 onBackPressed();
             }
@@ -77,7 +76,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
     }
 
     private void initialPageView() {
-        int selectedPosition = getIntent().getExtras().getInt("position", 0);
+        int selectedPosition = getIntent().getExtras().getInt(Intents.ImagePicker.POSITION, 0);
         pager = (CustomTouchScrollViewPager) findViewById(R.id.pager);
         adapter = new PageAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
@@ -138,7 +137,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
             PickupImageItem imageItem = imageItemList.get(pager.getCurrentItem());
 
             if (pickupImageHolder.isFull() && !imageItem.isSelected()) {
-                Toast.makeText(getApplicationContext(), String.format(Locale.getDefault(), "最多%d个", pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.pi_max_allow, pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
             } else {
                 imageItem.setSelected(!imageItem.isSelected());
                 pickupImageHolder.processSelectedCount(imageItem);
@@ -147,7 +146,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
                 supportInvalidateOptionsMenu();
 
                 Intent intent = new Intent();
-                intent.putExtra("pickupImageHolder", pickupImageHolder);
+                intent.putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder);
                 setResult(PickupImageActivity.RESULT_CODE_REFRESH, intent);
             }
 
@@ -157,7 +156,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    class PageAdapter extends FragmentPagerAdapter {
+    private class PageAdapter extends FragmentPagerAdapter {
 
         public PageAdapter(FragmentManager fm) {
             super(fm);
@@ -166,7 +165,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
-            bundle.putSerializable("imageItem", imageItemList.get(position));
+            bundle.putSerializable(Intents.ImagePicker.IMAGEITEM, imageItemList.get(position));
             PickupImagePagerItemFragment fragment = new PickupImagePagerItemFragment();
             fragment.setArguments(bundle);
             return fragment;

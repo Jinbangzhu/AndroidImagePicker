@@ -4,4 +4,5 @@
     <string name="pi_str_done">完成</string>
     <string name="pi_str_preview">预览</string>
     <string name="pi_str_choose_image">选择图片</string>
+    <string name="pi_max_allow">最多%d个</string>
 </resources>

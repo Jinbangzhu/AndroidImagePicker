@@ -12,7 +12,6 @@ public class PickupImageBuilder {
 
     private Intent intent;
 
-
     private Activity activity;
     private android.app.Fragment fragment;
     private android.support.v4.app.Fragment supportFragment;
@@ -42,32 +41,32 @@ public class PickupImageBuilder {
     }
 
     public PickupImageBuilder setTitle(String title) {
-        intent.putExtra("title", title);
+        intent.putExtra(Intents.ImagePicker.TITLE, title);
         return this;
     }
 
     public PickupImageBuilder setTitle(int title) {
-        intent.putExtra("titleRes", title);
+        intent.putExtra(Intents.ImagePicker.TITLERES, title);
         return this;
     }
 
     public PickupImageBuilder setMaxChosenLimit(int limit) {
-        intent.putExtra("limit", limit);
+        intent.putExtra(Intents.ImagePicker.LIMIT, limit);
         return this;
     }
 
     public PickupImageBuilder defaultChosen() {
-        intent.putExtra("defaultChosen", true);
+        intent.putExtra(Intents.ImagePicker.DEFAULTCHOSEN, true);
         return this;
     }
 
     public PickupImageBuilder DCIMOnly() {
-        intent.putExtra("dcimOnly", true);
+        intent.putExtra(Intents.ImagePicker.DCIMONLY, true);
         return this;
     }
 
     public PickupImageBuilder selectedImages(String[] selectedImages) {
-        intent.putExtra("selectedImages", selectedImages);
+        intent.putExtra(Intents.ImagePicker.SELECTEDIMAGES, selectedImages);
         return this;
     }
 
@@ -78,7 +77,7 @@ public class PickupImageBuilder {
      * @return
      */
     public PickupImageBuilder startTime(long startTime) {
-        intent.putExtra("startTime", startTime);
+        intent.putExtra(Intents.ImagePicker.STARTTIME, startTime);
         return this;
     }
 
