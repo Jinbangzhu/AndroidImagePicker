@@ -1,5 +1,6 @@
 package com.cndroid.pickimagelib.adapter;
 
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import com.cndroid.pickimagelib.R;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 import com.cndroid.pickimagelib.views.SelectableImageView;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -35,7 +37,7 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final PickupImageItem item = imageItemList.get(position);
         Glide.with(holder.imageView.getContext())
-                .load(item.getImageUri())
+                .load(Uri.fromFile(new File(item.getImagePath())))
                 .into(holder.imageView);
         holder.imageView.isSelected(item.isSelected());
 

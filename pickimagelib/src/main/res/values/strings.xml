@@ -1,5 +1,5 @@
 <resources>
-    <string name="pickup_image_all_images">All Photos</string>
+    <string name="pickup_image_all_images">全部</string>
     <string name="pickup_image_count_unit">%1$s张</string>
     <string name="pi_str_done">完成</string>
     <string name="pi_str_preview">预览</string>

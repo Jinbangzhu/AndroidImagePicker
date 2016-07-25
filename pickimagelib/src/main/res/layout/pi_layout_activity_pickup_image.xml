@@ -2,12 +2,10 @@
 
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:pi_app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.cndroid.imagepicker.MainActivity">
+    android:fitsSystemWindows="true">
 
 
     <android.support.design.widget.AppBarLayout
@@ -21,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            pi_app:layout_scrollFlags="scroll|enterAlways|snap"
+            pi_app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -33,7 +31,7 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:paddingBottom="@dimen/pi_album_name_bar_height"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        pi_app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <RelativeLayout
         android:id="@+id/rl_bottom"

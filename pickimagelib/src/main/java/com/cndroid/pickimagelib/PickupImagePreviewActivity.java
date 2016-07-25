@@ -1,5 +1,6 @@
 package com.cndroid.pickimagelib;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -14,11 +15,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 import com.cndroid.pickimagelib.views.CustomTouchScrollViewPager;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by jinbangzhu on 4/6/16.
@@ -30,30 +33,37 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
     protected Toolbar mToolbar;
     CustomTouchScrollViewPager pager;
     private TextView tvSelectedCount, tvDone;
+    PageAdapter adapter;
+
+    private PickupImageHolder pickupImageHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pi_layout_activity_pickup_image_pager);
+        setResult(RESULT_CANCELED);
 
+        pickupImageHolder = (PickupImageHolder) getIntent().getSerializableExtra("pickupImageHolder");
         initialActionBar();
         initialSelectedCountText();
 
-        initialDownAction();
+        initialDoneAction();
         // load data
-        imageItemList = PickupImageHolder.getInstance().getFilterPickupImageItems();
+        imageItemList = pickupImageHolder.getFilterPickupImageItems();
 
 
         initialPageView();
     }
 
-    private void initialDownAction() {
+    private void initialDoneAction() {
         LinearLayout linearLayoutDone = (LinearLayout) findViewById(R.id.ll_done);
         assert linearLayoutDone != null;
         linearLayoutDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(PickupImageActivity.RESULT_CODE_DONE);
+                Intent intent = new Intent();
+                intent.putExtra("pickupImageHolder", pickupImageHolder);
+                setResult(PickupImageActivity.RESULT_CODE_DONE, intent);
                 onBackPressed();
             }
         });
@@ -62,13 +72,14 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
     private void initialSelectedCountText() {
         tvSelectedCount = (TextView) findViewById(R.id.tv_selected_count);
         tvDone = (TextView) findViewById(R.id.tv_done);
-        PickupImageHolder.getInstance().setupTextViewState(tvSelectedCount, tvDone);
+        ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
+
     }
 
     private void initialPageView() {
         int selectedPosition = getIntent().getExtras().getInt("position", 0);
         pager = (CustomTouchScrollViewPager) findViewById(R.id.pager);
-        PageAdapter adapter = new PageAdapter(getSupportFragmentManager());
+        adapter = new PageAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
         pager.setCurrentItem(selectedPosition);
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -125,12 +136,21 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.pi_action_check_state) {
             PickupImageItem imageItem = imageItemList.get(pager.getCurrentItem());
-            imageItem.setSelected(!imageItem.isSelected());
-            PickupImageHolder.getInstance().processSelectedCount(imageItem, tvSelectedCount, tvDone);
 
-            supportInvalidateOptionsMenu();
+            if (pickupImageHolder.isFull() && !imageItem.isSelected()) {
+                Toast.makeText(getApplicationContext(), String.format(Locale.getDefault(), "最多%d个", pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
+            } else {
+                imageItem.setSelected(!imageItem.isSelected());
+                pickupImageHolder.processSelectedCount(imageItem);
+                ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
 
-            setResult(PickupImageActivity.RESULT_CODE_REFRESH);
+                supportInvalidateOptionsMenu();
+
+                Intent intent = new Intent();
+                intent.putExtra("pickupImageHolder", pickupImageHolder);
+                setResult(PickupImageActivity.RESULT_CODE_REFRESH, intent);
+            }
+
         } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
         }

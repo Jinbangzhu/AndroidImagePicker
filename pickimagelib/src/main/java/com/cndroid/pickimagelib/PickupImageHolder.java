@@ -1,31 +1,18 @@
 package com.cndroid.pickimagelib;
 
-import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.widget.TextView;
-
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by jinbangzhu on 4/6/16.
  */
-public class PickupImageHolder {
-
-
-    private static PickupImageHolder ourInstance = new PickupImageHolder();
-
-    public static PickupImageHolder getInstance() {
-        return ourInstance;
-    }
-
-    private PickupImageHolder() {
-    }
-
+public class PickupImageHolder implements Serializable {
 
     private int selectedCount = 0;
+    private int limit;
+
     private List<PickupImageItem> pickupImageItems;
     private List<PickupImageItem> filterPickupImageItems;
 
@@ -46,31 +33,16 @@ public class PickupImageHolder {
         this.filterPickupImageItems = filterPickupImageItems;
     }
 
-    public void processSelectedCount(PickupImageItem imageItem) {
-        processSelectedCount(imageItem, null, null);
-    }
 
-    public void processSelectedCount(PickupImageItem imageItem, TextView tvCount, TextView tvDone) {
+    public void processSelectedCount(PickupImageItem imageItem) {
         if (imageItem.isSelected())
             increaseSelectedCount();
         else
             decreaseSelectedCount();
-
-        setupTextViewState(tvCount, tvDone);
     }
 
-    public void setupTextViewState(TextView tvCount, TextView tvDone) {
-        if (tvCount != null) {
-            tvCount.setVisibility(selectedCount > 0 ? View.VISIBLE : View.GONE);
-            tvCount.setText(String.valueOf(this.selectedCount));
-
-            if (selectedCount != 0)
-                tvCount.startAnimation(AnimationUtils.loadAnimation(tvCount.getContext(), R.anim.pi_anim_scaler));
-        }
-
-        if (tvDone != null) {
-            tvDone.setEnabled(selectedCount > 0);
-        }
+    public boolean isFull() {
+        return selectedCount >= this.limit;
     }
 
     public int getSelectedCount() {
@@ -93,26 +65,22 @@ public class PickupImageHolder {
         return selectedCount;
     }
 
-    public ArrayList<String> getSelectedImageUrls() {
+    public String[] getSelectedImages() {
         if (0 == selectedCount) return null;
-        ArrayList<String> result = new ArrayList<>(selectedCount);
-        for (PickupImageItem imageItem : filterPickupImageItems) {
-            if (imageItem.isSelected()) result.add(imageItem.getImagePath());
+        String[] result = new String[selectedCount];
+        int position = 0;
+        for (PickupImageItem filterPickupImageItem : filterPickupImageItems) {
+            if (filterPickupImageItem.isSelected()) {
+                result[position] = filterPickupImageItem.getImagePath();
+                position++;
+            }
         }
-
         return result;
     }
 
-    public void registerPickupImageCallBack(PickupImageCallBack imagePickupCallBack) {
-        this.imagePickupCallBack = imagePickupCallBack;
-    }
-
-    public void onResult() {
-        if (null != imagePickupCallBack)
-            imagePickupCallBack.onGetUserChosenImages(getSelectedImageUrls());
-    }
-
-    private PickupImageCallBack imagePickupCallBack;
+//    public void registerPickupImageCallBack(PickupImageCallBack imagePickupCallBack) {
+//        this.imagePickupCallBack = imagePickupCallBack;
+//    }
 
 
     public void flush() {
@@ -122,6 +90,13 @@ public class PickupImageHolder {
         pickupImageItems = null;
         filterPickupImageItems = null;
         selectedCount = 0;
-        imagePickupCallBack = null;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 }

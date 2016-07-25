@@ -7,7 +7,14 @@ import java.io.Serializable;
 /**
  * Created by jinbangzhu on 1/8/16.
  */
-public class PickupImageItem implements Serializable{
+public class PickupImageItem implements Serializable {
+
+    private boolean selected;
+    private String imagePath;
+    private long dateAdded;
+    private String albumName;
+
+
     public boolean isSelected() {
         return selected;
     }
@@ -24,8 +31,13 @@ public class PickupImageItem implements Serializable{
         this.imagePath = imagePath;
     }
 
-    private boolean selected;
-    private String imagePath;
+    public long getDateAdded() {
+        return dateAdded;
+    }
+
+    public void setDateAdded(long dateAdded) {
+        this.dateAdded = dateAdded;
+    }
 
     public String getAlbumName() {
         return albumName;
@@ -35,16 +47,6 @@ public class PickupImageItem implements Serializable{
         this.albumName = albumName;
     }
 
-    private String albumName;
 
 
-    public Uri getImageUri() {
-        return imageUri;
-    }
-
-    public void setImageUri(Uri imageUri) {
-        this.imageUri = imageUri;
-    }
-
-    private Uri imageUri;
 }

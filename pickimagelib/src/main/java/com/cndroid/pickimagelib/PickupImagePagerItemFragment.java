@@ -1,5 +1,6 @@
 package com.cndroid.pickimagelib;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,8 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
+
+import java.io.File;
 
 import uk.co.senab.photoview.PhotoView;
 
@@ -38,7 +41,7 @@ public class PickupImagePagerItemFragment extends Fragment {
         PickupImageItem imageItem = (PickupImageItem) getArguments().getSerializable("imageItem");
         if (null == imageItem) return;
         Glide.with(getContext())
-                .load(imageItem.getImageUri())
+                .load(Uri.fromFile(new File(imageItem.getImagePath())))
                 .into(photoView);
     }
 }
