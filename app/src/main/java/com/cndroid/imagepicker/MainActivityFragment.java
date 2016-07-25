@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.cndroid.pickimagelib.PickupImageActivity;
 import com.cndroid.pickimagelib.PickupImageBuilder;
 
+import java.io.File;
+
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -22,6 +24,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     }
 
     private TextView textView;
+    private String[] selectedImages;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,36 +35,40 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
         return view;
     }
 
-    String[] images;
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PickupImageActivity.REQUEST_CODE_PICKUP && resultCode == RESULT_OK && data != null) {
-            images = data.getStringArrayExtra(PickupImageActivity.RESULT_ITEMS);
-            if (null != images) {
-                StringBuilder sb = new StringBuilder();
-                for (String image : images) {
-                    sb.append(image);
-                    sb.append("\n");
-                }
-                textView.setText(sb.toString());
+            selectedImages = data.getStringArrayExtra(PickupImageActivity.RESULT_ITEMS);
+            if (null != selectedImages) {
+                showSelectedImages();
             }
         }
     }
+
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_pickup_single_image:
                 PickupImageBuilder.with(MainActivityFragment.this)
-                        .setTitle("选择要导入的脚印")
-                        .selectedImages(images)
+                        .setTitle("Pickup Image")
+                        .selectedImages(selectedImages)
                         .setMaxChosenLimit(9)
-//                        .registerCallBackListener(this)
                         .startPickupImage(new ImageLoader());
                 break;
         }
+    }
+
+    private void showSelectedImages() {
+        StringBuilder sb = new StringBuilder();
+        for (String image : selectedImages) {
+            File file = new File(image);
+            sb.append(file.getName());
+            sb.append("\n");
+        }
+        textView.setText(sb.toString());
     }
 
 
