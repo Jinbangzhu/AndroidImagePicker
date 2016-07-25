@@ -1,9 +1,8 @@
 package com.cndroid.pickimagelib;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -15,13 +14,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cndroid.pickimagelib.adapter.AlbumChooserAdapter;
 import com.cndroid.pickimagelib.adapter.PickupImageAdapter;
@@ -29,6 +26,7 @@ import com.cndroid.pickimagelib.bean.AlbumItem;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,19 +43,21 @@ public class PickupImageActivity extends AppCompatActivity {
     public static final String RESULT_ITEMS = "result_items";
 
 
-    private List<PickupImageItem> pickupImageItems;
-    private List<PickupImageItem> filterPickupImageItems = new ArrayList<>();
+    private List<PickupImageItem> allImageItems;
+    private List<PickupImageItem> filteredPickupImageItems = new ArrayList<>();
     private String[] selectedImages;
 
     private PickupImageHolder pickupImageHolder;
 
     // Album name
-    private List<AlbumItem> albumItems;
+    private ArrayList<AlbumItem> albumItems;
 
     private TextView tvCurrentAlbumName;
     private TextView tvSelectedCount, tvDone;
     private LinearLayout llDone;
     private PickupImageAdapter pickupImageAdapter;
+
+    private PickupImageDisplay imageDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,28 +70,78 @@ public class PickupImageActivity extends AppCompatActivity {
          * when user chosen image, result is RESULT_CODE_DONE
          */
         setResult(RESULT_CODE_CANCEL);
+        if (null == savedInstanceState) {
+            pickupImageHolder = new PickupImageHolder();
 
-        pickupImageHolder = new PickupImageHolder();
-
-        initialToolBar();
-        initialSelectedCountText();
-
-        RecyclerView mRecyclerView = initialRecyclerView();
-
-        getImageFromMedia();
-
-        filterPickupImageItems.addAll(pickupImageItems);
-
-        pickupImageHolder.setPickupImageItems(pickupImageItems);
-        pickupImageHolder.setFilterPickupImageItems(filterPickupImageItems);
+            Bundle bundle = getIntent().getExtras();
+            int limit = bundle.getInt(Intents.ImagePicker.LIMIT, Integer.MAX_VALUE);
+            pickupImageHolder.setLimit(limit);
+            selectedImages = bundle.getStringArray(Intents.ImagePicker.SELECTEDIMAGES);
+            imageDisplay = (PickupImageDisplay) getIntent().getExtras().getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
 
 
-        ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
+            initialToolBar();
+            initialSelectedCountText();
+
+            RecyclerView mRecyclerView = initialRecyclerView();
+
+            getImageFromMedia();
+
+            filteredPickupImageItems.addAll(allImageItems);
+
+            pickupImageHolder.setAllImageItems(allImageItems);
+            pickupImageHolder.setFilteredPickupImageItems(filteredPickupImageItems);
 
 
-        setAdapter(mRecyclerView);
+            ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
 
-        initialDoneListener();
+
+            setAdapter(mRecyclerView);
+
+            initialDoneListener();
+        } else {
+            pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+            assert pickupImageHolder != null;
+
+            filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
+            allImageItems = pickupImageHolder.getAllImageItems();
+            imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+            albumItems = (ArrayList<AlbumItem>) savedInstanceState.getSerializable(Intents.ImagePicker.ALBUMITEMS);
+
+            initialToolBar();
+            initialSelectedCountText();
+
+            RecyclerView mRecyclerView = initialRecyclerView();
+            ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
+            setAdapter(mRecyclerView);
+
+            initialDoneListener();
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder);
+        outState.putSerializable(Intents.ImagePicker.SELECTEDIMAGES, selectedImages);
+        outState.putSerializable(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
+        outState.putParcelableArrayList(Intents.ImagePicker.ALBUMITEMS, albumItems);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (null != savedInstanceState) {
+            pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+            assert pickupImageHolder != null;
+
+            imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+            filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
+            allImageItems = pickupImageHolder.getAllImageItems();
+            albumItems = (ArrayList<AlbumItem>) savedInstanceState.getSerializable(Intents.ImagePicker.ALBUMITEMS);
+
+        }
     }
 
     private void initialDoneListener() {
@@ -111,11 +161,13 @@ public class PickupImageActivity extends AppCompatActivity {
 
     private void setAdapter(RecyclerView mRecyclerView) {
         pickupImageAdapter = new PickupImageAdapter();
-        pickupImageAdapter.setImageItemList(filterPickupImageItems);
+        pickupImageAdapter.setImageDisplay(imageDisplay);
+        pickupImageAdapter.setImageItemList(filteredPickupImageItems);
         pickupImageAdapter.setOnItemClickListener(new PickupImageAdapter.OnItemClickListener() {
             @Override
             public void onImageViewTaped(int position) {
                 startActivityForResult(new Intent(PickupImageActivity.this, PickupImagePreviewActivity.class)
+                        .putExtra(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay)
                         .putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder)
                         .putExtra(Intents.ImagePicker.POSITION, position), REQUEST_CODE_PREVIEW);
             }
@@ -123,7 +175,7 @@ public class PickupImageActivity extends AppCompatActivity {
             @Override
             public void onCheckBoxImageChecked(PickupImageItem item, int position) {
                 if (pickupImageHolder.isFull() && !item.isSelected()) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.pi_max_allow, pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
+                    imageDisplay.showTipsForLimitSelect(pickupImageHolder.getLimit());
                 } else {
                     item.setSelected(!item.isSelected());
                     pickupImageHolder.processSelectedCount(item);
@@ -171,13 +223,16 @@ public class PickupImageActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PREVIEW) {
-            pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
-            pickupImageItems = pickupImageHolder.getPickupImageItems();
-            filterPickupImageItems = pickupImageHolder.getFilterPickupImageItems();
-            pickupImageAdapter.setImageItemList(pickupImageHolder.getFilterPickupImageItems());
             if (resultCode == RESULT_CODE_REFRESH) {
+                pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+                allImageItems = pickupImageHolder.getAllImageItems();
+                filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
+                pickupImageAdapter.setImageItemList(pickupImageHolder.getFilteredPickupImageItems());
                 refreshAdapter();
             } else if (resultCode == RESULT_CODE_DONE) {
+                pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+                allImageItems = pickupImageHolder.getAllImageItems();
+                filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
                 done();
             }
         }
@@ -219,6 +274,7 @@ public class PickupImageActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
 
         final AlbumChooserAdapter adapter = new AlbumChooserAdapter();
+        adapter.setImageDisplay(imageDisplay);
         adapter.setAlbumItems(albumItems);
 
         recyclerView.setAdapter(adapter);
@@ -243,14 +299,14 @@ public class PickupImageActivity extends AppCompatActivity {
                 item.setHasChosen(true);
                 tvCurrentAlbumName.setText(item.getAlbumName());
 
-                filterPickupImageItems.clear();
+                filteredPickupImageItems.clear();
 
                 if (position == 0) {// All
-                    filterPickupImageItems.addAll(pickupImageItems);
+                    filteredPickupImageItems.addAll(allImageItems);
                 } else {// filter
-                    for (PickupImageItem imageItem : pickupImageItems) {
+                    for (PickupImageItem imageItem : allImageItems) {
                         if (imageItem.getAlbumName().equals(item.getAlbumName())) {
-                            filterPickupImageItems.add(imageItem);
+                            filteredPickupImageItems.add(imageItem);
                         }
                     }
                 }
@@ -262,7 +318,7 @@ public class PickupImageActivity extends AppCompatActivity {
 
 
     private void getImageFromMedia() {
-        pickupImageItems = new ArrayList<>();
+        allImageItems = new ArrayList<>();
         albumItems = new ArrayList<>();
 
         long startTime = 0l;
@@ -275,9 +331,7 @@ public class PickupImageActivity extends AppCompatActivity {
             startTime = bundle.getLong(Intents.ImagePicker.STARTTIME);
             defaultChosenAll = bundle.getBoolean(Intents.ImagePicker.DEFAULTCHOSEN, false);
             dcimOnly = bundle.getBoolean(Intents.ImagePicker.DCIMONLY, false);
-            int limit = bundle.getInt(Intents.ImagePicker.LIMIT, Integer.MAX_VALUE);
-            pickupImageHolder.setLimit(limit);
-            selectedImages = bundle.getStringArray(Intents.ImagePicker.SELECTEDIMAGES);
+
             // millisecond to second
             if (String.valueOf(startTime).length() > 10) startTime /= 1000;
         }
@@ -307,19 +361,21 @@ public class PickupImageActivity extends AppCompatActivity {
                 pickupImageItem.setAlbumName(albumName);
                 pickupImageItem.setImagePath(fullPath);
                 pickupImageItem.setSelected(defaultChosenAll);
-//                pickupImageItem.setImageUri(Uri.parse("file://" + fullPath));
                 pickupImageItem.setDateAdded(dateAdded);
 
-                pickupImageItems.add(pickupImageItem);
+                allImageItems.add(pickupImageItem);
 
                 // add `all images` folder
                 if (albumItems.size() == 0) {
                     AlbumItem item = new AlbumItem();
                     item.setAlbumName(getString(R.string.pickup_image_all_images));
-                    item.setAlbumImageUri(Uri.fromFile(new File(pickupImageItem.getImagePath())));
+                    item.setAlbumImagePath(pickupImageItem.getImagePath());
                     item.setHasChosen(true);
                     item.increaseImageCount();
                     albumItems.add(item);
+
+                    // set albumName
+                    tvCurrentAlbumName.setText(item.getAlbumName());
                 } else {
                     // always increase for all images
                     albumItems.get(0).increaseImageCount();
@@ -338,7 +394,6 @@ public class PickupImageActivity extends AppCompatActivity {
                     AlbumItem item = new AlbumItem();
                     item.setAlbumName(albumName);
                     item.setAlbumImagePath(fullPath);
-                    item.setAlbumImageUri(Uri.parse("file://" + fullPath));
                     item.setImageCount(1);
                     albumItems.add(item);
                 }
@@ -353,7 +408,7 @@ public class PickupImageActivity extends AppCompatActivity {
             }
 
             if (defaultChosenAll)
-                pickupImageHolder.setSelectedCount(pickupImageItems.size());
+                pickupImageHolder.setSelectedCount(allImageItems.size());
             else {
                 if (null != selectedImages && selectedImages.length > 0) {
                     pickupImageHolder.setSelectedCount(selectedImages.length);

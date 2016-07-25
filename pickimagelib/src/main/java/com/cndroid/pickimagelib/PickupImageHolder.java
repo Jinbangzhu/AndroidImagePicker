@@ -13,24 +13,24 @@ public class PickupImageHolder implements Serializable {
     private int selectedCount = 0;
     private int limit;
 
-    private List<PickupImageItem> pickupImageItems;
-    private List<PickupImageItem> filterPickupImageItems;
+    private List<PickupImageItem> allImageItems;
+    private List<PickupImageItem> filteredPickupImageItems;
 
-    public List<PickupImageItem> getPickupImageItems() {
-        return pickupImageItems;
+    public List<PickupImageItem> getAllImageItems() {
+        return allImageItems;
     }
 
-    public void setPickupImageItems(List<PickupImageItem> pickupImageItems) {
-        this.pickupImageItems = pickupImageItems;
+    public void setAllImageItems(List<PickupImageItem> allImageItems) {
+        this.allImageItems = allImageItems;
     }
 
 
-    public List<PickupImageItem> getFilterPickupImageItems() {
-        return filterPickupImageItems;
+    public List<PickupImageItem> getFilteredPickupImageItems() {
+        return filteredPickupImageItems;
     }
 
-    public void setFilterPickupImageItems(List<PickupImageItem> filterPickupImageItems) {
-        this.filterPickupImageItems = filterPickupImageItems;
+    public void setFilteredPickupImageItems(List<PickupImageItem> filteredPickupImageItems) {
+        this.filteredPickupImageItems = filteredPickupImageItems;
     }
 
 
@@ -69,7 +69,7 @@ public class PickupImageHolder implements Serializable {
         if (0 == selectedCount) return null;
         String[] result = new String[selectedCount];
         int position = 0;
-        for (PickupImageItem filterPickupImageItem : filterPickupImageItems) {
+        for (PickupImageItem filterPickupImageItem : filteredPickupImageItems) {
             if (filterPickupImageItem.isSelected()) {
                 result[position] = filterPickupImageItem.getImagePath();
                 position++;
@@ -84,11 +84,11 @@ public class PickupImageHolder implements Serializable {
 
 
     public void flush() {
-        if (null != pickupImageItems) pickupImageItems.clear();
-        if (null != filterPickupImageItems) filterPickupImageItems.clear();
+        if (null != allImageItems) allImageItems.clear();
+        if (null != filteredPickupImageItems) filteredPickupImageItems.clear();
 
-        pickupImageItems = null;
-        filterPickupImageItems = null;
+        allImageItems = null;
+        filteredPickupImageItems = null;
         selectedCount = 0;
     }
 

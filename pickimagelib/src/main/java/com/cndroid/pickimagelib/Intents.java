@@ -59,6 +59,9 @@ public class Intents {
          */
         public static final String POSITION = "position";
 
+        public static final String IMAGEDISPLAY = "imageDisplay";
+        public static final String ALBUMITEMS = "albumItems";
+
 
     }
 }

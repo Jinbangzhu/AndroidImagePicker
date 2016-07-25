@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.cndroid.pickimagelib.PickupImageDisplay;
 import com.cndroid.pickimagelib.R;
 import com.cndroid.pickimagelib.bean.AlbumItem;
 
@@ -23,6 +23,12 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
 
     private List<AlbumItem> albumItems;
 
+    public void setImageDisplay(PickupImageDisplay imageDisplay) {
+        this.imageDisplay = imageDisplay;
+    }
+
+    private PickupImageDisplay imageDisplay;
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -34,9 +40,7 @@ public class AlbumChooserAdapter extends RecyclerView.Adapter<AlbumChooserAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         final AlbumItem albumItem = albumItems.get(position);
-        Glide.with(holder.imageView.getContext())
-                .load(albumItem.getAlbumImageUri())
-                .into(holder.imageView);
+        imageDisplay.displayImage(holder.imageView, albumItem.getAlbumImagePath());
         holder.tvAlbumName.setText(albumItem.getAlbumName());
         holder.tvAlbumImageCount.setText(holder.imageView.getContext().getString(R.string.pickup_image_count_unit, albumItem.getImageCount()));
         holder.ivIsChoosed.setVisibility(albumItem.isHasChosen() ? View.VISIBLE : View.GONE);

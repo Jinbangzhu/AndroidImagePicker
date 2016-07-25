@@ -81,13 +81,16 @@ public class PickupImageBuilder {
         return this;
     }
 
+
 //    public PickupImageBuilder registerCallBackListener(PickupImageCallBack pickupImageCallBack) {
 //        PickupImageHolder.getInstance().registerPickupImageCallBack(pickupImageCallBack);
 //        return this;
 //    }
 
 
-    public void startPickupImage() {
+    public void startPickupImage(PickupImageDisplay imageDisplay) {
+        intent.putExtra(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
+
         if (null != fragment)
             fragment.startActivityForResult(intent, PickupImageActivity.REQUEST_CODE_PICKUP);
         else if (null != supportFragment)

@@ -1,5 +1,6 @@
 package com.cndroid.pickimagelib;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,11 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 import com.cndroid.pickimagelib.views.CustomTouchScrollViewPager;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -34,6 +35,9 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
     private TextView tvSelectedCount, tvDone;
     PageAdapter adapter;
 
+    private PickupImageDisplay imageDisplay;
+
+
     private PickupImageHolder pickupImageHolder;
 
     @Override
@@ -42,16 +46,43 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
         setContentView(R.layout.pi_layout_activity_pickup_image_pager);
         setResult(RESULT_CANCELED);
 
-        pickupImageHolder = (PickupImageHolder) getIntent().getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+        if (savedInstanceState == null) {
+            pickupImageHolder = (PickupImageHolder) getIntent().getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+            imageDisplay = (PickupImageDisplay) getIntent().getExtras().getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+        } else {
+            pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+            assert pickupImageHolder != null;
+
+            imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+
+        }
         initialActionBar();
         initialSelectedCountText();
 
         initialDoneAction();
         // load data
-        imageItemList = pickupImageHolder.getFilterPickupImageItems();
+        imageItemList = pickupImageHolder.getFilteredPickupImageItems();
 
 
         initialPageView();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder);
+        outState.putSerializable(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
+        assert pickupImageHolder != null;
+
+        imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+
     }
 
     private void initialDoneAction() {
@@ -137,7 +168,7 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
             PickupImageItem imageItem = imageItemList.get(pager.getCurrentItem());
 
             if (pickupImageHolder.isFull() && !imageItem.isSelected()) {
-                Toast.makeText(getApplicationContext(), getString(R.string.pi_max_allow, pickupImageHolder.getLimit()), Toast.LENGTH_LONG).show();
+                imageDisplay.showTipsForLimitSelect(pickupImageHolder.getLimit());
             } else {
                 imageItem.setSelected(!imageItem.isSelected());
                 pickupImageHolder.processSelectedCount(imageItem);
@@ -166,7 +197,9 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             Bundle bundle = new Bundle();
             bundle.putSerializable(Intents.ImagePicker.IMAGEITEM, imageItemList.get(position));
+            bundle.putSerializable(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
             PickupImagePagerItemFragment fragment = new PickupImagePagerItemFragment();
+
             fragment.setArguments(bundle);
             return fragment;
         }
@@ -182,7 +215,6 @@ public class PickupImagePreviewActivity extends AppCompatActivity {
 
 
         if (Build.VERSION.SDK_INT > 11) {
-//            mToolbar.setBackgroundColor(Color.parseColor("#00000000"));
             mAppBar.setBackgroundResource(R.color.pickup_image_preview_bar_bg);
 
             mToolbar.setBackgroundResource(R.color.pickup_image_preview_bar_bg);

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.cndroid.imagepicker">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -23,6 +24,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.cndroid.pickimagelib.PickupImageActivity"
+            tools:replace="android:theme"
+            android:theme="@style/PickUpImageTheme" />
     </application>
 
 </manifest>

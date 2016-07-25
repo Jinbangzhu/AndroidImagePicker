@@ -59,7 +59,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                         .selectedImages(images)
                         .setMaxChosenLimit(9)
 //                        .registerCallBackListener(this)
-                        .startPickupImage();
+                        .startPickupImage(new ImageLoader());
                 break;
         }
     }
