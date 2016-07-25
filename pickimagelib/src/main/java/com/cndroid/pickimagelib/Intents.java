@@ -55,12 +55,29 @@ public class Intents {
         public static final String IMAGEITEM = "imageItem";
 
         /**
-         *  extra key for position
+         * extra key for position
          */
         public static final String POSITION = "position";
 
         public static final String IMAGEDISPLAY = "imageDisplay";
-        public static final String ALBUMITEMS = "albumItems";
+        /**
+         * extra is show camera
+         */
+        public static final String SHOWCAMERA = "showCamera";
+
+
+        public static final String RESULT_ITEMS = "result_items";
+
+        public static final String PHOTO_PATH = "mCurrentPhotoPath";
+
+
+
+        public static final int RESULT_CODE_DONE = 0x1;
+        public static final int RESULT_CODE_REFRESH = 0x2;
+        public static final int RESULT_CODE_CANCEL = 0x4;
+        public static final int REQUEST_CODE_PREVIEW = 0x3;
+        public static final int REQUEST_CODE_PICKUP = 0x5;
+        public static final int REQUEST_CODE_TAKEPHOTO = 0x6;
 
 
     }

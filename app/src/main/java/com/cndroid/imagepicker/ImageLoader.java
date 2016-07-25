@@ -22,6 +22,11 @@ public class ImageLoader extends PickupImageDisplay {
                 .into(imageView);
     }
 
+    @Override
+    public void displayCameraImage(ImageView imageView) {
+
+    }
+
 
     @Override
     public void showTipsForLimitSelect(int limit) {

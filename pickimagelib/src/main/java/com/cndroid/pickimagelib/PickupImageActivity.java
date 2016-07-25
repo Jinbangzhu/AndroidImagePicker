@@ -1,9 +1,10 @@
 package com.cndroid.pickimagelib;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
@@ -26,38 +27,34 @@ import com.cndroid.pickimagelib.bean.AlbumItem;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.REQUEST_CODE_PREVIEW;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.REQUEST_CODE_TAKEPHOTO;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.RESULT_CODE_CANCEL;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.RESULT_CODE_DONE;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.RESULT_CODE_REFRESH;
 
 /**
  * Created by jinbangzhu on 1/8/16.
  */
 public class PickupImageActivity extends AppCompatActivity {
-    public static final int RESULT_CODE_DONE = 0x1;
-    public static final int RESULT_CODE_REFRESH = 0x2;
-    public static final int RESULT_CODE_CANCEL = 0x4;
-    public static final int REQUEST_CODE_PREVIEW = 0x3;
-    public static final int REQUEST_CODE_PICKUP = 0x5;
-
-    public static final String RESULT_ITEMS = "result_items";
 
 
-    private List<PickupImageItem> allImageItems;
     private List<PickupImageItem> filteredPickupImageItems = new ArrayList<>();
-    private String[] selectedImages;
 
     private PickupImageHolder pickupImageHolder;
 
-    // Album name
-    private ArrayList<AlbumItem> albumItems;
-
     private TextView tvCurrentAlbumName;
     private TextView tvSelectedCount, tvDone;
-    private LinearLayout llDone;
     private PickupImageAdapter pickupImageAdapter;
+    private String mCurrentPhotoPath;
 
-    private PickupImageDisplay imageDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +67,21 @@ public class PickupImageActivity extends AppCompatActivity {
          * when user chosen image, result is RESULT_CODE_DONE
          */
         setResult(RESULT_CODE_CANCEL);
+
+        init(savedInstanceState);
+
+    }
+
+    private void init(Bundle savedInstanceState) {
         if (null == savedInstanceState) {
             pickupImageHolder = new PickupImageHolder();
 
             Bundle bundle = getIntent().getExtras();
             int limit = bundle.getInt(Intents.ImagePicker.LIMIT, Integer.MAX_VALUE);
             pickupImageHolder.setLimit(limit);
-            selectedImages = bundle.getStringArray(Intents.ImagePicker.SELECTEDIMAGES);
-            imageDisplay = (PickupImageDisplay) getIntent().getExtras().getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
+            pickupImageHolder.setImageDisplay((PickupImageDisplay) bundle.getSerializable(Intents.ImagePicker.IMAGEDISPLAY));
+            boolean showCamera = bundle.getBoolean(Intents.ImagePicker.SHOWCAMERA, false);
+            pickupImageHolder.setShowCamera(showCamera);
 
 
             initialToolBar();
@@ -87,26 +91,17 @@ public class PickupImageActivity extends AppCompatActivity {
 
             getImageFromMedia();
 
-            filteredPickupImageItems.addAll(allImageItems);
-
-            pickupImageHolder.setAllImageItems(allImageItems);
+            filteredPickupImageItems.addAll(pickupImageHolder.getAllImageItems());
             pickupImageHolder.setFilteredPickupImageItems(filteredPickupImageItems);
 
-
             ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
-
-
             setAdapter(mRecyclerView);
-
             initialDoneListener();
         } else {
             pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
             assert pickupImageHolder != null;
 
             filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
-            allImageItems = pickupImageHolder.getAllImageItems();
-            imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
-            albumItems = (ArrayList<AlbumItem>) savedInstanceState.getSerializable(Intents.ImagePicker.ALBUMITEMS);
 
             initialToolBar();
             initialSelectedCountText();
@@ -114,19 +109,15 @@ public class PickupImageActivity extends AppCompatActivity {
             RecyclerView mRecyclerView = initialRecyclerView();
             ViewHelper.setupTextViewState(tvSelectedCount, tvDone, pickupImageHolder.getSelectedCount());
             setAdapter(mRecyclerView);
-
             initialDoneListener();
         }
-
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder);
-        outState.putSerializable(Intents.ImagePicker.SELECTEDIMAGES, selectedImages);
-        outState.putSerializable(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
-        outState.putParcelableArrayList(Intents.ImagePicker.ALBUMITEMS, albumItems);
+        outState.putSerializable(Intents.ImagePicker.PHOTO_PATH, mCurrentPhotoPath);
     }
 
     @Override
@@ -136,16 +127,13 @@ public class PickupImageActivity extends AppCompatActivity {
             pickupImageHolder = (PickupImageHolder) savedInstanceState.getSerializable(Intents.ImagePicker.PICKUPIMAGEHOLDER);
             assert pickupImageHolder != null;
 
-            imageDisplay = (PickupImageDisplay) savedInstanceState.getSerializable(Intents.ImagePicker.IMAGEDISPLAY);
             filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
-            allImageItems = pickupImageHolder.getAllImageItems();
-            albumItems = (ArrayList<AlbumItem>) savedInstanceState.getSerializable(Intents.ImagePicker.ALBUMITEMS);
-
+            mCurrentPhotoPath = savedInstanceState.getString(Intents.ImagePicker.PHOTO_PATH);
         }
     }
 
     private void initialDoneListener() {
-        llDone = (LinearLayout) findViewById(R.id.ll_done);
+        LinearLayout llDone = (LinearLayout) findViewById(R.id.ll_done);
         llDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,21 +149,24 @@ public class PickupImageActivity extends AppCompatActivity {
 
     private void setAdapter(RecyclerView mRecyclerView) {
         pickupImageAdapter = new PickupImageAdapter();
-        pickupImageAdapter.setImageDisplay(imageDisplay);
+        pickupImageAdapter.setImageDisplay(pickupImageHolder.getImageDisplay());
         pickupImageAdapter.setImageItemList(filteredPickupImageItems);
         pickupImageAdapter.setOnItemClickListener(new PickupImageAdapter.OnItemClickListener() {
             @Override
             public void onImageViewTaped(int position) {
-                startActivityForResult(new Intent(PickupImageActivity.this, PickupImagePreviewActivity.class)
-                        .putExtra(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay)
-                        .putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder)
-                        .putExtra(Intents.ImagePicker.POSITION, position), REQUEST_CODE_PREVIEW);
+                if (isTapedCamera(position)) {
+                    dispatchTakePictureIntent();
+                } else {
+                    startActivityForResult(new Intent(PickupImageActivity.this, PickupImagePreviewActivity.class)
+                            .putExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER, pickupImageHolder)
+                            .putExtra(Intents.ImagePicker.POSITION, position), REQUEST_CODE_PREVIEW);
+                }
             }
 
             @Override
             public void onCheckBoxImageChecked(PickupImageItem item, int position) {
                 if (pickupImageHolder.isFull() && !item.isSelected()) {
-                    imageDisplay.showTipsForLimitSelect(pickupImageHolder.getLimit());
+                    pickupImageHolder.getImageDisplay().showTipsForLimitSelect(pickupImageHolder.getLimit());
                 } else {
                     item.setSelected(!item.isSelected());
                     pickupImageHolder.processSelectedCount(item);
@@ -185,6 +176,10 @@ public class PickupImageActivity extends AppCompatActivity {
             }
         });
         mRecyclerView.setAdapter(pickupImageAdapter);
+    }
+
+    private boolean isTapedCamera(int position) {
+        return position == 0 && pickupImageHolder.isShowCamera();
     }
 
     @NonNull
@@ -225,15 +220,22 @@ public class PickupImageActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_PREVIEW) {
             if (resultCode == RESULT_CODE_REFRESH) {
                 pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
-                allImageItems = pickupImageHolder.getAllImageItems();
                 filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
                 pickupImageAdapter.setImageItemList(pickupImageHolder.getFilteredPickupImageItems());
                 refreshAdapter();
             } else if (resultCode == RESULT_CODE_DONE) {
                 pickupImageHolder = (PickupImageHolder) data.getSerializableExtra(Intents.ImagePicker.PICKUPIMAGEHOLDER);
-                allImageItems = pickupImageHolder.getAllImageItems();
                 filteredPickupImageItems = pickupImageHolder.getFilteredPickupImageItems();
                 done();
+            }
+        } else if (requestCode == REQUEST_CODE_TAKEPHOTO) {
+            if (resultCode == RESULT_OK) {
+                Intent intent = new Intent();
+                intent.putExtra(Intents.ImagePicker.RESULT_ITEMS, new String[]{mCurrentPhotoPath});
+                setResult(RESULT_OK, intent);
+
+                galleryAddPic();
+                onBackPressed();
             }
         }
     }
@@ -243,7 +245,7 @@ public class PickupImageActivity extends AppCompatActivity {
      */
     private void done() {
         Intent intent = new Intent();
-        intent.putExtra(RESULT_ITEMS, pickupImageHolder.getSelectedImages());
+        intent.putExtra(Intents.ImagePicker.RESULT_ITEMS, pickupImageHolder.getSelectedImages());
         setResult(RESULT_OK, intent);
         // flush cached data
         pickupImageHolder.flush();
@@ -274,8 +276,8 @@ public class PickupImageActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(mLayoutManager);
 
         final AlbumChooserAdapter adapter = new AlbumChooserAdapter();
-        adapter.setImageDisplay(imageDisplay);
-        adapter.setAlbumItems(albumItems);
+        adapter.setImageDisplay(pickupImageHolder.getImageDisplay());
+        adapter.setAlbumItems(pickupImageHolder.getAlbumItems());
 
         recyclerView.setAdapter(adapter);
 
@@ -301,10 +303,17 @@ public class PickupImageActivity extends AppCompatActivity {
 
                 filteredPickupImageItems.clear();
 
+                /**
+                 * only show camera when the filter is all
+                 */
+//                addCameraIfNeed(filteredPickupImageItems);
+
+
                 if (position == 0) {// All
-                    filteredPickupImageItems.addAll(allImageItems);
+
+                    filteredPickupImageItems.addAll(pickupImageHolder.getAllImageItems());
                 } else {// filter
-                    for (PickupImageItem imageItem : allImageItems) {
+                    for (PickupImageItem imageItem : pickupImageHolder.getAllImageItems()) {
                         if (imageItem.getAlbumName().equals(item.getAlbumName())) {
                             filteredPickupImageItems.add(imageItem);
                         }
@@ -318,8 +327,11 @@ public class PickupImageActivity extends AppCompatActivity {
 
 
     private void getImageFromMedia() {
-        allImageItems = new ArrayList<>();
-        albumItems = new ArrayList<>();
+        List<PickupImageItem> allImageItems = new ArrayList<>();
+        List<AlbumItem> albumItems = new ArrayList<>();
+
+        pickupImageHolder.setAllImageItems(allImageItems);
+        pickupImageHolder.setAlbumItems(albumItems);
 
         long startTime = 0l;
         boolean defaultChosenAll = false;
@@ -331,10 +343,12 @@ public class PickupImageActivity extends AppCompatActivity {
             startTime = bundle.getLong(Intents.ImagePicker.STARTTIME);
             defaultChosenAll = bundle.getBoolean(Intents.ImagePicker.DEFAULTCHOSEN, false);
             dcimOnly = bundle.getBoolean(Intents.ImagePicker.DCIMONLY, false);
-
             // millisecond to second
             if (String.valueOf(startTime).length() > 10) startTime /= 1000;
         }
+
+        addCameraIfNeed(allImageItems);
+
 
         Cursor imageCursor = null;
         try {
@@ -344,6 +358,7 @@ public class PickupImageActivity extends AppCompatActivity {
             imageCursor = getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, null, orderBy);
             assert imageCursor != null;
 
+
             while (imageCursor.moveToNext()) {
                 String fullPath = imageCursor.getString(imageCursor.getColumnIndex(MediaStore.Images.Media.DATA));
 
@@ -351,13 +366,12 @@ public class PickupImageActivity extends AppCompatActivity {
                 if (dcimOnly && (!fullPath.toLowerCase().contains("dcim") || !fullPath.toLowerCase().contains("camera")))
                     continue;
 
-                PickupImageItem pickupImageItem = new PickupImageItem();
-
 
                 String imgPath = fullPath.substring(0, fullPath.lastIndexOf(File.separator));
                 String albumName = imgPath.substring(imgPath.lastIndexOf(File.separator) + 1, imgPath.length());
                 long dateAdded = imageCursor.getLong(imageCursor.getColumnIndex(MediaStore.Images.Media.DATE_ADDED));
 
+                PickupImageItem pickupImageItem = new PickupImageItem();
                 pickupImageItem.setAlbumName(albumName);
                 pickupImageItem.setImagePath(fullPath);
                 pickupImageItem.setSelected(defaultChosenAll);
@@ -382,38 +396,12 @@ public class PickupImageActivity extends AppCompatActivity {
                 }
 
 
-                boolean isAddedAlbum = false;
-                for (AlbumItem albumItem : albumItems) {
-                    if (albumName.equals(albumItem.getAlbumName())) {
-                        isAddedAlbum = true;
-                        albumItem.increaseImageCount();
-                    }
-                }
+                createAlbum(albumItems, fullPath, albumName);
 
-                if (!isAddedAlbum) {
-                    AlbumItem item = new AlbumItem();
-                    item.setAlbumName(albumName);
-                    item.setAlbumImagePath(fullPath);
-                    item.setImageCount(1);
-                    albumItems.add(item);
-                }
-
-                if (null != selectedImages && selectedImages.length > 0) {
-                    for (String selectedImage : selectedImages) {
-                        if (fullPath.equals(selectedImage)) {
-                            pickupImageItem.setSelected(true);
-                        }
-                    }
-                }
+                setChosenState(fullPath, pickupImageItem);
             }
 
-            if (defaultChosenAll)
-                pickupImageHolder.setSelectedCount(allImageItems.size());
-            else {
-                if (null != selectedImages && selectedImages.length > 0) {
-                    pickupImageHolder.setSelectedCount(selectedImages.length);
-                }
-            }
+            setChosenCount(allImageItems, defaultChosenAll);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -421,6 +409,61 @@ public class PickupImageActivity extends AppCompatActivity {
             if (imageCursor != null && !imageCursor.isClosed()) {
                 imageCursor.close();
             }
+        }
+    }
+
+    private void addCameraIfNeed(List<PickupImageItem> allImageItems) {
+        if (pickupImageHolder.isShowCamera()) {
+            PickupImageItem pickupImageItem = new PickupImageItem();
+            pickupImageItem.setAlbumName(Intents.ImagePicker.SHOWCAMERA);
+            pickupImageItem.setImagePath(Intents.ImagePicker.SHOWCAMERA);
+            pickupImageItem.setSelected(false);
+            pickupImageItem.setDateAdded(0);
+            allImageItems.add(pickupImageItem);
+        }
+    }
+
+    private void setChosenState(String fullPath, PickupImageItem pickupImageItem) {
+        String[] selectedImages = getSelectedImageArray();
+        if (null != selectedImages && selectedImages.length > 0) {
+            for (String selectedImage : selectedImages) {
+                if (fullPath.equals(selectedImage)) {
+                    pickupImageItem.setSelected(true);
+                }
+            }
+        }
+    }
+
+    private void setChosenCount(List<PickupImageItem> allImageItems, boolean defaultChosenAll) {
+        if (defaultChosenAll)
+            pickupImageHolder.setSelectedCount(allImageItems.size());
+        else {
+            String[] selectedImages = getSelectedImageArray();
+            if (null != selectedImages && selectedImages.length > 0) {
+                pickupImageHolder.setSelectedCount(selectedImages.length);
+            }
+        }
+    }
+
+    private String[] getSelectedImageArray() {
+        return getIntent().getExtras().getStringArray(Intents.ImagePicker.SELECTEDIMAGES);
+    }
+
+    private void createAlbum(List<AlbumItem> albumItems, String fullPath, String albumName) {
+        boolean isAddedAlbum = false;
+        for (AlbumItem albumItem : albumItems) {
+            if (albumName.equals(albumItem.getAlbumName())) {
+                isAddedAlbum = true;
+                albumItem.increaseImageCount();
+            }
+        }
+
+        if (!isAddedAlbum) {
+            AlbumItem item = new AlbumItem();
+            item.setAlbumName(albumName);
+            item.setAlbumImagePath(fullPath);
+            item.setImageCount(1);
+            albumItems.add(item);
         }
     }
 
@@ -433,4 +476,55 @@ public class PickupImageActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = Uri.fromFile(photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_CODE_TAKEPHOTO);
+            }
+        }
+    }
+
+    private void galleryAddPic() {
+        try {
+            Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            File f = new File(mCurrentPhotoPath);
+            Uri contentUri = Uri.fromFile(f);
+            mediaScanIntent.setData(contentUri);
+            sendBroadcast(mediaScanIntent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

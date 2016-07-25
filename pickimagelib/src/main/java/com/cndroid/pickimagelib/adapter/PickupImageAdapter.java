@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.cndroid.pickimagelib.Intents;
 import com.cndroid.pickimagelib.PickupImageDisplay;
 import com.cndroid.pickimagelib.R;
 import com.cndroid.pickimagelib.bean.PickupImageItem;
@@ -17,17 +18,10 @@ import java.util.List;
  * Created by jinbangzhu on 1/8/16.
  */
 public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.ViewHolder> {
-    public void setImageItemList(List<PickupImageItem> imageItemList) {
-        this.imageItemList = imageItemList;
-    }
-
-    public void setImageDisplay(PickupImageDisplay imageDisplay) {
-        this.imageDisplay = imageDisplay;
-    }
 
     private PickupImageDisplay imageDisplay;
-
     private List<PickupImageItem> imageItemList;
+
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -41,13 +35,23 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final PickupImageItem item = imageItemList.get(position);
 
-        imageDisplay.displayImage(holder.imageView, item.getImagePath());
-        holder.imageView.isSelected(item.isSelected());
-
-        if (item.isSelected()) {
-            holder.imageViewCheckState.setImageResource(R.mipmap.pi_icon_check_on);
+        if (position == 0 && Intents.ImagePicker.SHOWCAMERA.equals(item.getAlbumName())) {
+            holder.imageViewCheckState.setVisibility(View.GONE);
+            holder.imageView.setImageResource(R.mipmap.ic_camera_alt_white_48dp);
+            holder.imageView.setScaleType(ImageView.ScaleType.CENTER);
+            imageDisplay.displayCameraImage(holder.imageView);
         } else {
-            holder.imageViewCheckState.setImageResource(R.mipmap.pi_icon_check_off);
+            holder.imageViewCheckState.setVisibility(View.VISIBLE);
+            holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+            imageDisplay.displayImage(holder.imageView, item.getImagePath());
+            holder.imageView.isSelected(item.isSelected());
+
+            if (item.isSelected()) {
+                holder.imageViewCheckState.setImageResource(R.mipmap.pi_icon_check_on);
+            } else {
+                holder.imageViewCheckState.setImageResource(R.mipmap.pi_icon_check_off);
+            }
         }
 
         holder.imageViewCheckState.setOnClickListener(new View.OnClickListener() {
@@ -99,4 +103,11 @@ public class PickupImageAdapter extends RecyclerView.Adapter<PickupImageAdapter.
         }
     }
 
+    public void setImageItemList(List<PickupImageItem> imageItemList) {
+        this.imageItemList = imageItemList;
+    }
+
+    public void setImageDisplay(PickupImageDisplay imageDisplay) {
+        this.imageDisplay = imageDisplay;
+    }
 }

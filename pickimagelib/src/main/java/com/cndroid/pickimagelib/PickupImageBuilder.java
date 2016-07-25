@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 
+import static com.cndroid.pickimagelib.Intents.ImagePicker.REQUEST_CODE_PICKUP;
+
 /**
  * Created by jinbangzhu on 4/7/16.
  */
@@ -81,21 +83,19 @@ public class PickupImageBuilder {
         return this;
     }
 
-
-//    public PickupImageBuilder registerCallBackListener(PickupImageCallBack pickupImageCallBack) {
-//        PickupImageHolder.getInstance().registerPickupImageCallBack(pickupImageCallBack);
-//        return this;
-//    }
-
+    public PickupImageBuilder showCamera(boolean showCamera) {
+        intent.putExtra(Intents.ImagePicker.SHOWCAMERA, showCamera);
+        return this;
+    }
 
     public void startPickupImage(PickupImageDisplay imageDisplay) {
         intent.putExtra(Intents.ImagePicker.IMAGEDISPLAY, imageDisplay);
 
         if (null != fragment)
-            fragment.startActivityForResult(intent, PickupImageActivity.REQUEST_CODE_PICKUP);
+            fragment.startActivityForResult(intent, REQUEST_CODE_PICKUP);
         else if (null != supportFragment)
-            supportFragment.startActivityForResult(intent, PickupImageActivity.REQUEST_CODE_PICKUP);
+            supportFragment.startActivityForResult(intent, REQUEST_CODE_PICKUP);
         else
-            activity.startActivityForResult(intent, PickupImageActivity.REQUEST_CODE_PICKUP);
+            activity.startActivityForResult(intent, REQUEST_CODE_PICKUP);
     }
 }

@@ -1,7 +1,5 @@
 package com.cndroid.pickimagelib.bean;
 
-import android.net.Uri;
-
 import java.io.Serializable;
 
 /**
@@ -46,7 +44,6 @@ public class PickupImageItem implements Serializable {
     public void setAlbumName(String albumName) {
         this.albumName = albumName;
     }
-
 
 
 }

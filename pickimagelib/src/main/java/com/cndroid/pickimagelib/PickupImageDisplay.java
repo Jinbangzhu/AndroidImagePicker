@@ -15,6 +15,13 @@ public abstract class PickupImageDisplay implements Serializable {
     public abstract void displayImage(ImageView imageView, String fullImagePath);
 
     /**
+     * camera
+     *
+     * @param imageView
+     */
+    public abstract void displayCameraImage(ImageView imageView);
+
+    /**
      * show tips when selected images is full
      *
      * @param limit max allow selected

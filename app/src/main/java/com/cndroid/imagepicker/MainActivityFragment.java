@@ -8,12 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cndroid.pickimagelib.PickupImageActivity;
+import com.cndroid.pickimagelib.Intents;
 import com.cndroid.pickimagelib.PickupImageBuilder;
 
 import java.io.File;
 
 import static android.app.Activity.RESULT_OK;
+import static com.cndroid.pickimagelib.Intents.ImagePicker.REQUEST_CODE_PICKUP;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -39,8 +40,8 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PickupImageActivity.REQUEST_CODE_PICKUP && resultCode == RESULT_OK && data != null) {
-            selectedImages = data.getStringArrayExtra(PickupImageActivity.RESULT_ITEMS);
+        if (requestCode == REQUEST_CODE_PICKUP && resultCode == RESULT_OK && data != null) {
+            selectedImages = data.getStringArrayExtra(Intents.ImagePicker.RESULT_ITEMS);
             if (null != selectedImages) {
                 showSelectedImages();
             }
@@ -55,6 +56,7 @@ public class MainActivityFragment extends Fragment implements View.OnClickListen
                 PickupImageBuilder.with(MainActivityFragment.this)
                         .setTitle("Pickup Image")
                         .selectedImages(selectedImages)
+                        .showCamera(true)
                         .setMaxChosenLimit(9)
                         .startPickupImage(new ImageLoader());
                 break;
